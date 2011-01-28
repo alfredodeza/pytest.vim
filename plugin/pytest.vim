@@ -22,7 +22,7 @@ endfun
 
 " Always goes back to the first instance
 " and returns that if found
-function! FindPythonObject(obj)
+function! s:FindPythonObject(obj)
     let orig_line = line('.')
     let orig_col = col('.')
 
@@ -44,10 +44,10 @@ function! FindPythonObject(obj)
 endfunction
 
 
-function! NameOfCurrentClass()
+function! s:NameOfCurrentClass()
     let save_cursor = getpos(".")
     normal $<cr>
-    let find_object = FindPythonObject('class')
+    let find_object = s:FindPythonObject('class')
     if (find_object)
         let line = getline('.')
         call setpos('.', save_cursor)
@@ -57,10 +57,10 @@ function! NameOfCurrentClass()
 endfunction
 
 
-function! NameOfCurrentMethod()
+function! s:NameOfCurrentMethod()
     let save_cursor = getpos(".")
     normal $<cr>
-    let find_object = FindPythonObject('method')
+    let find_object = s:FindPythonObject('method')
     if (find_object)
         let line = getline('.')
         call setpos('.', save_cursor)
@@ -70,13 +70,13 @@ function! NameOfCurrentMethod()
 endfunction
 
 
-function! CurrentPath()
+function! s:CurrentPath()
     let cwd = expand("%:p")
     return cwd
 endfunction
 
 
-function! RunPyTest(path)
+function! s:RunPyTest(path)
     let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
     
@@ -97,8 +97,7 @@ function! RunPyTest(path)
         endif    
     endfor
     if (failed == 1)
-        call RedBar()
-        call RedBar()
+        call s:RedBar()
         for error in error_list
             let file = error[0]
             let split_error = split(error[1], "E ")
@@ -106,13 +105,12 @@ function! RunPyTest(path)
             echo file . " ==>> " .actual_error
         endfor
     else
-        call GreenBar()
+        call s:GreenBar()
     endif
-    "echo out
 endfunction
 
 
-function! RedBar()
+function! s:RedBar()
     redraw
     hi RedBar ctermfg=white ctermbg=red guibg=red
     echohl RedBar
@@ -121,7 +119,7 @@ function! RedBar()
 endfunction
 
 
-function! GreenBar()
+function! s:GreenBar()
     redraw
     hi GreenBar ctermfg=white ctermbg=green guibg=green
     echohl GreenBar
@@ -130,31 +128,45 @@ function! GreenBar()
 endfunction
 
 
-function! PyTestThisMethod()
-    let m_name  = NameOfCurrentMethod()
-    let c_name  = NameOfCurrentClass()
-    let abspath = CurrentPath()
-    echo "Running test for method " . m_name . "\n"
+function! s:ThisMethod()
+    let m_name  = s:NameOfCurrentMethod()
+    let c_name  = s:NameOfCurrentClass()
+    let abspath = s:CurrentPath()
+    echo "Running test for method " . m_name 
     let path =  abspath . "::" . c_name . "::" . m_name 
-    call RunPyTest(path)
+    call s:RunPyTest(path)
 endfunction
 
 
-function! PyTestThisClass()
-    let c_name      = NameOfCurrentClass()
-    let abspath     = CurrentPath()
-    echo "Running tests for class " . c_name . "\n"
+function! s:ThisClass()
+    let c_name      = s:NameOfCurrentClass()
+    let abspath     = s:CurrentPath()
+    echo "Running tests for class " . c_name 
 
     let path = abspath . "::" . c_name
-    call RunPyTest(path)
+    call s:RunPyTest(path)
 endfunction
 
-function! PyTestThisFile()
-    echo "Running tests for entire file \n"
-    let abspath     = CurrentPath()
-    call RunPyTest(abspath)
+function! s:ThisFile()
+    echo "Running tests for entire file "
+    let abspath     = s:CurrentPath()
+    call s:RunPyTest(abspath)
 endfunction
     
-"nnoremap <Plug>PyTestThisMethod   :<C-U>call ThisMethod() <CR>
-"nnoremap <Plug>PyTestThisClass    :<C-U>call ThisClass()  <CR>
-"nnoremap <Plug>PyTestThisFile     :<C-U>call ThisFile()   <CR>
+
+function! s:Completion(ArgLead, CmdLine, CursorPos)
+    return "class\nmethod\nfile\n" 
+endfunction
+
+function! s:Proxy(action)
+    if (a:action == "class")
+        call s:ThisClass()
+    elseif (a:action == "method")
+        call s:ThisMethod()
+    else
+        call s:ThisFile()
+    endif
+endfunction
+
+command! -nargs=1 -complete=custom,s:Completion Pytest call s:Proxy(<f-args>)
+
