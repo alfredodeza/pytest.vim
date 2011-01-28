@@ -11,10 +11,10 @@ around between the terminal and your vim session.
 Screenshots:
 
 Failing Tests
-.. image:: http://www.flickr.com/photos/aldegaz/5395135575
+http://www.flickr.com/photos/aldegaz/5395135575
 
 Passing Tests
-.. image:: http://www.flickr.com/photos/aldegaz/5395135539
+http://www.flickr.com/photos/aldegaz/5395135539
 
 Usage
 -----
