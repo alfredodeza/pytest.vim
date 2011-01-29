@@ -46,7 +46,7 @@ something like this::
 
 If you would like to see the complete py.test output you can add a "verbose"
 flag to any of the commands for Pytest. For the previous command, it would
-look like:
+look like::
 
     :Pytest class verbose
 
