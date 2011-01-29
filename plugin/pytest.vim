@@ -9,12 +9,12 @@ if exists("g:loaded_pytest") || &cp
   finish
 endif
 
-function! Echo(msg)
+function! s:Echo(msg)
   if (! exists('g:chapa_messages') || exists('g:chapa_messages') && g:chapa_messages)
     let x=&ruler | let y=&showcmd
     set noruler noshowcmd
     redraw
-    echo a:msg
+    echohl WarningMsg | echo a:msg | echohl None
     let &ruler=x | let &showcmd=y
   endif
 endfun
@@ -96,6 +96,7 @@ function! s:RunPyTest(path)
     let failed = 0
     let error_list = []
     let single_error = []
+    let pytest_error = ""
     for w in split(out, '\n')
         if (len(single_error) == 2)
             call add(error_list, single_error)
@@ -110,6 +111,9 @@ function! s:RunPyTest(path)
             endif
         elseif w =~  '\v^E\s+'
             call add(single_error, w)
+
+        elseif w =~ '\v^ERROR:\s+'
+            let pytest_error = w
         endif
     endfor
     
@@ -121,8 +125,11 @@ function! s:RunPyTest(path)
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
             echo "Line:  " . file . "\t==>> " .actual_error
         endfor
-    else
+    elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
+    elseif (pytest_error != "")
+        call s:RedBar()
+        echo "py.test " . pytest_error
     endif
 endfunction
 
@@ -149,6 +156,14 @@ function! s:ThisMethod(verbose)
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
+    if (strlen(m_name) == 1)
+        call s:Echo("Unable to find a matching method for testing.")
+        return
+    elseif (strlen(c_name) == 1)
+        call s:Echo("Unable to find a matching class for testing.")
+        return
+    endif
+
     echo "Running test for method " . m_name 
     let path =  abspath . "::" . c_name . "::" . m_name 
     if (a:verbose == 1)
@@ -162,6 +177,10 @@ endfunction
 function! s:ThisClass(verbose)
     let c_name      = s:NameOfCurrentClass()
     let abspath     = s:CurrentPath()
+    if (strlen(c_name) == 1)
+        call s:Echo("Unable to find a matching class for testing.")
+        return
+    endif
     echo "Running tests for class " . c_name 
 
     let path = abspath . "::" . c_name
