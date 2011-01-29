@@ -27,7 +27,7 @@ function! s:FindPythonObject(obj)
     let orig_col = col('.')
 
     if (a:obj == "class")
-        let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*\(\s*'
+        let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*'
     elseif (a:obj == "method")
         let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(self[^)]*)'
     else
