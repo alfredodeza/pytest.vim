@@ -76,7 +76,7 @@ function! s:CurrentPath()
 endfunction
 
 
-function! s:RunPyTest(path)
+function! s:RunPyTest(path, verbose)
     let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
     
@@ -107,6 +107,9 @@ function! s:RunPyTest(path)
     else
         call s:GreenBar()
     endif
+    if (a:verbose == 1)
+        echo out
+    endif
 endfunction
 
 
@@ -128,45 +131,50 @@ function! s:GreenBar()
 endfunction
 
 
-function! s:ThisMethod()
+function! s:ThisMethod(verbose)
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
     echo "Running test for method " . m_name 
     let path =  abspath . "::" . c_name . "::" . m_name 
-    call s:RunPyTest(path)
+    call s:RunPyTest(path, a:verbose)
 endfunction
 
 
-function! s:ThisClass()
+function! s:ThisClass(verbose)
     let c_name      = s:NameOfCurrentClass()
     let abspath     = s:CurrentPath()
     echo "Running tests for class " . c_name 
 
     let path = abspath . "::" . c_name
-    call s:RunPyTest(path)
+    call s:RunPyTest(path, a:verbose)
 endfunction
 
-function! s:ThisFile()
+function! s:ThisFile(verbose)
     echo "Running tests for entire file "
     let abspath     = s:CurrentPath()
-    call s:RunPyTest(abspath)
+    call s:RunPyTest(abspath, a:verbose)
 endfunction
     
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
-    return "class\nmethod\nfile\n" 
+    return "class\nmethod\nfile\nverbose\n" 
 endfunction
 
-function! s:Proxy(action)
-    if (a:action == "class")
-        call s:ThisClass()
-    elseif (a:action == "method")
-        call s:ThisMethod()
+function! s:Proxy(action, ...)
+    if (a:0 == 1)
+        let verbose = 1
     else
-        call s:ThisFile()
+        let verbose = 0
+    endif
+    if (a:action == "class")
+        call s:ThisClass(verbose)
+    elseif (a:action == "method")
+        call s:ThisMethod(verbose)
+    else
+        call s:ThisFile(verbose)
     endif
 endfunction
 
-command! -nargs=1 -complete=custom,s:Completion Pytest call s:Proxy(<f-args>)
+command! -nargs=+ -complete=custom,s:Completion Pytest call s:Proxy(<f-args>)
 
