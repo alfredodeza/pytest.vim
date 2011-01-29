@@ -11,10 +11,13 @@ around between the terminal and your vim session.
 Screenshots:
 
 Failing Tests
-http://www.flickr.com/photos/aldegaz/5395135575
+http://www.flickr.com/photos/aldegaz/5398749422
 
 Passing Tests
 http://www.flickr.com/photos/aldegaz/5395135539
+
+Verbose Mode
+http://www.flickr.com/photos/aldegaz/5398148049/
 
 Usage
 -----
