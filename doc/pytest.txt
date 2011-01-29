@@ -51,6 +51,16 @@ something like this:
 When tests are successful a green bar appears. If you have any number of fails
 you get a red bar with a line-by-line list of line numbers and errors.
 
+If you would like to see the complete py.test output you can add a "verbose"
+flag to any of the commands for Pytest. For the previous command, it would
+look like:
+
+    :Pytest class verbose
+
+This would open a split scratch buffer that you can fully interact with. You
+can close this buffer with ':wq' or you can hit 'q' at any moment in that buffer
+to close it.
+
 I strongly encourage a mapping for the above actions. For example, if you
 wanted leader mappings you would probably do them like this:
 
