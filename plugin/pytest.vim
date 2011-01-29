@@ -177,9 +177,9 @@ function! s:ThisFile(verbose)
     echo "Running tests for entire file "
     let abspath     = s:CurrentPath()
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(abspath)
     else
-        call s:RunPyTest(path)
+        call s:RunPyTest(abspath)
     endif
 endfunction
     
