@@ -83,10 +83,7 @@ function! s:RunInSplitWindow(path)
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
 	silent! execute 'silent %!'. command
 	silent! execute 'resize ' . line('$')
-	"silent! redraw
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
-	"silent! execute 'au BufUnload <buffer> execute bufwinnr(' . bufnr('#') . ') . ''wincmd w'''
-	"silent! execute 'nnoremap <silent> <buffer> <LocalLeader>r :call <SID>ExecuteInShell(''' . command . ''')<CR>'
 endfunction
 
 command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
