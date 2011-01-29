@@ -75,40 +75,57 @@ function! s:CurrentPath()
     return cwd
 endfunction
 
-
-function! s:RunPyTest(path, verbose)
+function! s:RunInSplitWindow(path)
     let cmd = "py.test --tb=short " . a:path
+	let command = join(map(split(cmd), 'expand(v:val)'))
+	let winnr = bufwinnr('^' . command . '$')
+	silent! execute  winnr < 0 ? 'botright new ' . fnameescape(command) : winnr . 'wincmd w'
+	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
+	silent! execute 'silent %!'. command
+	silent! execute 'resize ' . line('$')
+	"silent! redraw
+    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+	"silent! execute 'au BufUnload <buffer> execute bufwinnr(' . bufnr('#') . ') . ''wincmd w'''
+	"silent! execute 'nnoremap <silent> <buffer> <LocalLeader>r :call <SID>ExecuteInShell(''' . command . ''')<CR>'
+endfunction
+
+command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
+
+
+function! s:RunPyTest(path)
+    let cmd = "py.test " . a:path
     let out = system(cmd)
     
     let failed = 0
     let error_list = []
     let single_error = []
     for w in split(out, '\n')
-        if w =~ 'FAILURES'
-            let failed = 1
-        elseif w =~ '\v^\s*\w+.py:'
-            call add(single_error, w)
-        elseif w =~  '\v^\s*E\s+'
-            call add(single_error, w)
-        endif
         if (len(single_error) == 2)
             call add(error_list, single_error)
             let single_error = []
         endif    
+        if w =~ 'FAILURES'
+            let failed = 1
+        elseif w =~ '\v^\s*(.*)py:(\d+):'
+            if w =~ @%
+                let match_result = matchlist(w, '\v:(\d+):')
+                call insert(single_error, match_result[1])
+            endif
+        elseif w =~  '\v^E\s+'
+            call add(single_error, w)
+        endif
     endfor
+    
     if (failed == 1)
         call s:RedBar()
         for error in error_list
             let file = error[0]
             let split_error = split(error[1], "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
-            echo file . " ==>> " .actual_error
+            echo "Line:  " . file . "\t==>> " .actual_error
         endfor
     else
         call s:GreenBar()
-    endif
-    if (a:verbose == 1)
-        echo out
     endif
 endfunction
 
@@ -137,7 +154,11 @@ function! s:ThisMethod(verbose)
     let abspath = s:CurrentPath()
     echo "Running test for method " . m_name 
     let path =  abspath . "::" . c_name . "::" . m_name 
-    call s:RunPyTest(path, a:verbose)
+    if (a:verbose == 1)
+        call s:RunInSplitWindow(path)
+    else
+        call s:RunPyTest(path)
+    endif
 endfunction
 
 
@@ -147,19 +168,29 @@ function! s:ThisClass(verbose)
     echo "Running tests for class " . c_name 
 
     let path = abspath . "::" . c_name
-    call s:RunPyTest(path, a:verbose)
+    if (a:verbose == 1)
+        call s:RunInSplitWindow(path)
+    else
+        call s:RunPyTest(path)
+    endif
 endfunction
+
 
 function! s:ThisFile(verbose)
     echo "Running tests for entire file "
     let abspath     = s:CurrentPath()
-    call s:RunPyTest(abspath, a:verbose)
+    if (a:verbose == 1)
+        call s:RunInSplitWindow(path)
+    else
+        call s:RunPyTest(path)
+    endif
 endfunction
     
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
     return "class\nmethod\nfile\nverbose\n" 
 endfunction
+
 
 function! s:Proxy(action, ...)
     if (a:0 == 1)
