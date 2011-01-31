@@ -9,12 +9,17 @@ if exists("g:loaded_pytest") || &cp
   finish
 endif
 
+
+" Global variables for registering next/previous error
 let g:session_errors = {}
 let g:session_error = 0
 
+
 function! GoToError(direction)
+    " direction == 0 goes to first
     " direction ==  1 goes forward
     " direction == -1 goes backwards
+    " directtion == 2 goes to last
     if (len(g:session_errors) > 0)
         if (a:direction == -1)
             if (g:session_error == 0 || g:session_error == 1)
@@ -22,32 +27,38 @@ function! GoToError(direction)
             else
                 let g:session_error = g:session_error - 1
             endif
-            let select_error = g:session_errors[g:session_error]
-            let line_number = select_error['line']
-            exe line_number
-            echo "Failed test: " . g:session_error . "\t at line ==>> " . line_number
         elseif (a:direction == 1)
             if (g:session_error != len(g:session_errors))
                 let g:session_error = g:session_error + 1
             endif
-            let select_error = g:session_errors[g:session_error]
-            let line_number = select_error['line']
-            exe line_number
-            echo "Failed test: " . g:session_error . "\t at line ==>> " . line_number
+        elseif (a:direction == 0)
+            let g:session_error = 1
+        elseif (a:direction == 2)
+            let g:session_error = len(g:session_errors)
         endif
+
+        let select_error = g:session_errors[g:session_error]
+        let line_number = select_error['line']
+        exe line_number
+        let message = "Failed test: " . g:session_error . "\t at line ==>> " . line_number
+        call s:Echo(message, 1)
     else
         call s:Echo("Failed test list is empty.")
     endif
 endfunction
 
-function! s:Echo(msg)
-  if (! exists('g:chapa_messages') || exists('g:chapa_messages') && g:chapa_messages)
+
+function! s:Echo(msg, ...)
     let x=&ruler | let y=&showcmd
     set noruler noshowcmd
     redraw
-    echohl WarningMsg | echo a:msg | echohl None
+    if (a:0 == 1)
+        echo a:msg
+    else
+        echohl WarningMsg | echo a:msg | echohl None
+    endif
+
     let &ruler=x | let &showcmd=y
-  endif
 endfun
 
 
