@@ -93,37 +93,46 @@ function! s:RunPyTest(path)
     let cmd = "py.test " . a:path
     let out = system(cmd)
     
+    " Pointers and default variables
     let failed = 0
-    let error_list = []
-    let single_error = []
+    let errors = {}
+    let error = {}
+    let error_number = 0
     let pytest_error = ""
+
+    " Loop through the output and build the error dict
     for w in split(out, '\n')
-        if (len(single_error) == 2)
-            call add(error_list, single_error)
-            let single_error = []
-        endif    
+        if (len(error) == 2)
+            let error_number = error_number + 1
+            let errors[error_number] = error
+            let error = {}
+        endif
+
         if w =~ 'FAILURES'
             let failed = 1
         elseif w =~ '\v^\s*(.*)py:(\d+):'
             if w =~ @%
                 let match_result = matchlist(w, '\v:(\d+):')
-                call insert(single_error, match_result[1])
+                let error.line = match_result[1]
             endif
         elseif w =~  '\v^E\s+'
-            call add(single_error, w)
+            let split_error = split(w, "E ")
+            let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
+            let error.error = actual_error
 
         elseif w =~ '\v^ERROR:\s+'
             let pytest_error = w
         endif
     endfor
     
+    " Display the result Bars
     if (failed == 1)
         call s:RedBar()
-        for error in error_list
-            let file = error[0]
-            let split_error = split(error[1], "E ")
-            let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
-            echo "Line:  " . file . "\t==>> " .actual_error
+        for err in keys(errors)
+            let err_dict = errors[err]
+            let line_number = err_dict['line']
+            let actual_error = err_dict['error']
+            echo "Line:  " . line_number . "\t==>> " . actual_error
         endfor
     elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
