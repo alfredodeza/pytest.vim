@@ -9,6 +9,37 @@ if exists("g:loaded_pytest") || &cp
   finish
 endif
 
+let g:session_errors = {}
+let g:session_error = 0
+
+function! GoToError(direction)
+    " direction ==  1 goes forward
+    " direction == -1 goes backwards
+    if (len(g:session_errors) > 0)
+        if (a:direction == -1)
+            if (g:session_error == 0 || g:session_error == 1)
+                let g:session_error = 1
+            else
+                let g:session_error = g:session_error - 1
+            endif
+            let select_error = g:session_errors[g:session_error]
+            let line_number = select_error['line']
+            exe line_number
+            echo "Failed test: " . g:session_error . "\t at line ==>> " . line_number
+        elseif (a:direction == 1)
+            if (g:session_error != len(g:session_errors))
+                let g:session_error = g:session_error + 1
+            endif
+            let select_error = g:session_errors[g:session_error]
+            let line_number = select_error['line']
+            exe line_number
+            echo "Failed test: " . g:session_error . "\t at line ==>> " . line_number
+        endif
+    else
+        call s:Echo("Failed test list is empty.")
+    endif
+endfunction
+
 function! s:Echo(msg)
   if (! exists('g:chapa_messages') || exists('g:chapa_messages') && g:chapa_messages)
     let x=&ruler | let y=&showcmd
@@ -99,6 +130,8 @@ function! s:RunPyTest(path)
     let error = {}
     let error_number = 0
     let pytest_error = ""
+    let g:session_errors = {}
+    let g:session_error = 0
 
     " Loop through the output and build the error dict
     for w in split(out, '\n')
@@ -133,6 +166,7 @@ function! s:RunPyTest(path)
             let line_number = err_dict['line']
             let actual_error = err_dict['error']
             echo "Line:  " . line_number . "\t==>> " . actual_error
+            let g:session_errors = errors
         endfor
     elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
@@ -231,6 +265,7 @@ function! s:Proxy(action, ...)
         call s:ThisFile(verbose)
     endif
 endfunction
+
 
 command! -nargs=+ -complete=custom,s:Completion Pytest call s:Proxy(<f-args>)
 
