@@ -15,7 +15,7 @@ let g:session_errors = {}
 let g:session_error = 0
 
 
-function! GoToError(direction)
+function! s:GoToError(direction)
     " direction == 0 goes to first
     " direction ==  1 goes forward
     " direction == -1 goes backwards
@@ -258,7 +258,7 @@ endfunction
     
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
-    return "class\nmethod\nfile\nverbose\n" 
+    return "class\nmethod\nfile\nverbose\nnext\nprevious\nfirst\nlast\n" 
 endfunction
 
 
@@ -272,8 +272,16 @@ function! s:Proxy(action, ...)
         call s:ThisClass(verbose)
     elseif (a:action == "method")
         call s:ThisMethod(verbose)
-    else
+    elseif (a:action == "file")
         call s:ThisFile(verbose)
+    elseif (a:action == "next")
+        call s:GoToError(1)
+    elseif (a:action == "previous")
+        call s:GoToError(-1)
+    elseif (a:action == "first")
+        call s:GoToError(0)
+    elseif (a:action == "last")
+        call s:GoToError(2)
     endif
 endfunction
 
