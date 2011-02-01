@@ -49,9 +49,9 @@ endfunction
 
 
 function! s:Echo(msg, ...)
+    redraw!
     let x=&ruler | let y=&showcmd
     set noruler noshowcmd
-    redraw
     if (a:0 == 1)
         echo a:msg
     else
@@ -117,6 +117,7 @@ function! s:CurrentPath()
     return cwd
 endfunction
 
+
 function! s:RunInSplitWindow(path)
     let cmd = "py.test --tb=short " . a:path
 	let command = join(map(split(cmd), 'expand(v:val)'))
@@ -128,11 +129,9 @@ function! s:RunInSplitWindow(path)
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
 endfunction
 
-command! -complete=shellcmd -nargs=+ Shell call s:ExecuteInShell(<q-args>)
-
 
 function! s:RunPyTest(path)
-    let cmd = "py.test " . a:path
+    let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
     
     " Pointers and default variables
@@ -155,7 +154,8 @@ function! s:RunPyTest(path)
         if w =~ 'FAILURES'
             let failed = 1
         elseif w =~ '\v^\s*(.*)py:(\d+):'
-            if w =~ @%
+            let filename = expand("%:t")
+            if w =~ filename
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.line = match_result[1]
             endif
@@ -218,8 +218,10 @@ function! s:ThisMethod(verbose)
         return
     endif
 
-    echo "Running test for method " . m_name 
     let path =  abspath . "::" . c_name . "::" . m_name 
+    let message = "Running test for method " . m_name 
+    call s:Echo(message, 1)
+
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
@@ -235,7 +237,8 @@ function! s:ThisClass(verbose)
         call s:Echo("Unable to find a matching class for testing.")
         return
     endif
-    echo "Running tests for class " . c_name 
+    let message  = "Running tests for class " . c_name 
+    call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
     if (a:verbose == 1)
@@ -247,7 +250,7 @@ endfunction
 
 
 function! s:ThisFile(verbose)
-    echo "Running tests for entire file "
+    call s:Echo("Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
     if (a:verbose == 1)
         call s:RunInSplitWindow(abspath)
