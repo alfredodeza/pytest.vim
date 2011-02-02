@@ -130,6 +130,46 @@ function! s:RunInSplitWindow(path)
 endfunction
 
 
+function! s:ShowFails()
+	let winnr = bufwinnr('Pytest_Fails')
+	silent! execute  winnr < 0 ? 'botright new ' . 'Pytest_Fails' : winnr . 'wincmd w'
+	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
+    let blank_line = repeat(" ",&columns - 1)
+    exe "normal i" . blank_line 
+    hi RedBar ctermfg=white ctermbg=red guibg=red
+    match RedBar /\%1l/
+    if (len(g:session_errors) == 0)
+        call setline(2, "There are currently no errors for a previous run.")
+    else
+        for err in keys(g:session_errors)
+            let err_dict = g:session_errors[err]
+            let line_number = err_dict['line']
+            let actual_error = err_dict['error']
+            let path_error = err_dict['path']
+            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
+            let error_number = err + 1
+            call setline(error_number, message)    
+        endfor
+    endif
+	silent! execute 'resize ' . line('$')
+    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+    exe "normal 0|"
+    exe "normal G"
+    exe 'wincmd w'
+endfunction
+
+
+function! s:ToggleFailWindow()
+	let winnr = bufwinnr('Pytest_Fails')
+    if (winnr == -1)
+        call s:ShowFails()
+    else
+        silent! execute winnr . 'wincmd w'
+        silent! execute 'q'
+    endif
+endfunction
+
+
 function! s:RunPyTest(path)
     let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
@@ -145,7 +185,7 @@ function! s:RunPyTest(path)
 
     " Loop through the output and build the error dict
     for w in split(out, '\n')
-        if (len(error) == 2)
+        if (len(error) == 3)
             let error_number = error_number + 1
             let errors[error_number] = error
             let error = {}
@@ -158,6 +198,8 @@ function! s:RunPyTest(path)
             if w =~ filename
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.line = match_result[1]
+                let file_path = matchlist(w, '\v(.*.py):')
+                let error.path = file_path[1]
             endif
         elseif w =~  '\v^E\s+'
             let split_error = split(w, "E ")
@@ -176,7 +218,8 @@ function! s:RunPyTest(path)
             let err_dict = errors[err]
             let line_number = err_dict['line']
             let actual_error = err_dict['error']
-            echo "Line:  " . line_number . "\t==>> " . actual_error
+            let path_error = err_dict['path']
+            echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
             let g:session_errors = errors
         endfor
     elseif (failed == 0 && pytest_error == "")
@@ -219,7 +262,7 @@ function! s:ThisMethod(verbose)
     endif
 
     let path =  abspath . "::" . c_name . "::" . m_name 
-    let message = "Running test for method " . m_name 
+    let message = "py.test ==> Running test for method " . m_name 
     call s:Echo(message, 1)
 
     if (a:verbose == 1)
@@ -237,7 +280,7 @@ function! s:ThisClass(verbose)
         call s:Echo("Unable to find a matching class for testing.")
         return
     endif
-    let message  = "Running tests for class " . c_name 
+    let message  = "py.test ==> Running tests for class " . c_name 
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
@@ -250,7 +293,7 @@ endfunction
 
 
 function! s:ThisFile(verbose)
-    call s:Echo("Running tests for entire file ", 1)
+    call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
     if (a:verbose == 1)
         call s:RunInSplitWindow(abspath)
@@ -277,6 +320,8 @@ function! s:Proxy(action, ...)
         call s:ThisMethod(verbose)
     elseif (a:action == "file")
         call s:ThisFile(verbose)
+    elseif (a:action == "fails")
+        call s:ToggleFailWindow()
     elseif (a:action == "next")
         call s:GoToError(1)
     elseif (a:action == "previous")
