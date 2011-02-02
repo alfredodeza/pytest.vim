@@ -39,7 +39,14 @@ function! s:GoToError(direction)
 
         let select_error = g:session_errors[g:session_error]
         let line_number = select_error['line']
-        exe line_number
+        let error_path = select_error['path']
+        let file_name = expand("%:t")
+        if error_path =~ file_name
+            execute line_number
+        else
+            call OpenError(error_path)
+            execute line_number
+        endif
         let message = "Failed test: " . g:session_error . "\t at line ==>> " . line_number
         call s:Echo(message, 1)
     else
@@ -130,6 +137,14 @@ function! s:RunInSplitWindow(path)
 endfunction
 
 
+function! OpenError(path)
+	let winnr = bufwinnr('Pytest_GoToError')
+	silent! execute  winnr < 0 ? 'botright new ' . ' Pytest_GoToError' : winnr . 'wincmd w'
+	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
+    silent! execute ":e " . a:path
+    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+endfunction
+
 function! s:ShowFails()
 	let winnr = bufwinnr('Pytest_Fails')
 	silent! execute  winnr < 0 ? 'botright new ' . 'Pytest_Fails' : winnr . 'wincmd w'
@@ -194,13 +209,10 @@ function! s:RunPyTest(path)
         if w =~ 'FAILURES'
             let failed = 1
         elseif w =~ '\v^\s*(.*)py:(\d+):'
-            let filename = expand("%:t")
-            if w =~ filename
-                let match_result = matchlist(w, '\v:(\d+):')
-                let error.line = match_result[1]
-                let file_path = matchlist(w, '\v(.*.py):')
-                let error.path = file_path[1]
-            endif
+            let match_result = matchlist(w, '\v:(\d+):')
+            let error.line = match_result[1]
+            let file_path = matchlist(w, '\v(.*.py):')
+            let error.path = file_path[1]
         elseif w =~  '\v^E\s+'
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
