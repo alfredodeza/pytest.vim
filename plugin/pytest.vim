@@ -44,7 +44,7 @@ function! s:GoToError(direction)
         if error_path =~ file_name
             execute line_number
         else
-            call OpenError(error_path)
+            call s:OpenError(error_path)
             execute line_number
         endif
         let message = "Failed test: " . g:session_error . "\t at line ==>> " . line_number
@@ -137,13 +137,14 @@ function! s:RunInSplitWindow(path)
 endfunction
 
 
-function! OpenError(path)
+function! s:OpenError(path)
 	let winnr = bufwinnr('Pytest_GoToError')
 	silent! execute  winnr < 0 ? 'botright new ' . ' Pytest_GoToError' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
     silent! execute ":e " . a:path
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
 endfunction
+
 
 function! s:ShowFails()
 	let winnr = bufwinnr('Pytest_Fails')
