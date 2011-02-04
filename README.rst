@@ -26,12 +26,15 @@ This plugin provides a single command::
 
     Pytest
 
-It can take a few arguments that are able to be tab-completed. These arguments
-are::
+All arguments are able to be tab-completed.
+
+For running tests the plugin provides 3 arguments with an optional one. 
+These arguments are::
 
     class
     method
     file
+
 
 As you may expect, those will focus on the tests for the current class, method
 or the whole file.
@@ -47,7 +50,7 @@ something like this::
 
     Running tests for class TestMyClass
 
-If you would like to see the complete py.test output you can add a "verbose"
+If you would like to see the complete py.test output you can add an optional "verbose"
 flag to any of the commands for Pytest. For the previous command, it would
 look like::
 
@@ -67,6 +70,46 @@ wanted leader mappings you would probably do them like this::
     nmap <silent><Leader>f <Esc>:Pytest file<CR>
     nmap <silent><Leader>c <Esc>:Pytest class<CR>
     nmap <silent><Leader>m <Esc>:Pytest method<CR>
+
+
+This plugin also provides a way to jump to the actual error. Since errors can
+be living in a file other than your test (e.g. a syntax error in your source
+that triggers an assertion errro in the current file) you can also jump to that
+file. The list of jumping-to-error arguments are::
+
+    first
+    last
+    next 
+    previous
+    end
+
+
+Pytest **DOES NOT JUMP AUTOMATICALLY** to errors. You have to call the action. When
+you call a jump, a split buffer is opened with a file (if it is not the same as
+the one you are currently editing) and places you in the same line number were
+the error was reported.
+
+If an error starts in the current file but ends on a different one, you can
+call that ``end of error`` by calling ``:Pytest end``.
+
+Finally, you can also display in a split scratch buffer either the last list
+of failed tests (with line numbers, errors and paths) or the last ``py.test``
+session (similar to what you would see in a terminal). The arguments that 
+you would need to provide for such actions are::
+
+    session
+    fails
+
+``session`` is the buffer with a similar output to the terminal (but with
+syntax highlighting) and ``fails`` has the list of last failed errors.
+
+The reason behind this is that as soon as you hit any key, the quick display
+goes away. With a split buffer you are in control and you can quit that window
+when you decide -  while you work on fixing errors.
+
+The commands that open the last session and the last fails are toggable: they
+will close the scratch buffer if it is open or will open it if its closed.
+
 
 License
 -------
