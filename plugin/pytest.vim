@@ -336,7 +336,12 @@ function! s:RunPyTest(path)
             let line_number = err_dict['line']
             let actual_error = err_dict['error']
             let path_error = err_dict['path']
-            echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
+            let ends = err_dict['file_path']
+            if (path_error == ends)
+                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
+            else
+                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error . "\t\tEnds On: " . ends
+            endif
             let g:session_errors = errors
         endfor
     elseif (failed == 0 && pytest_error == "")
