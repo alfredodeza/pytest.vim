@@ -426,7 +426,7 @@ endfunction
     
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
-    return "class\nmethod\nfile\nverbose\nnext\nprevious\nfirst\nlast\nsession\n"
+    return "class\nmethod\nfile\nverbose\nnext\nprevious\nfirst\nlast\nsession\nend\n"
 endfunction
 
 
