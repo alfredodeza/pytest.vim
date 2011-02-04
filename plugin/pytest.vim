@@ -208,6 +208,10 @@ endfunction
 
 
 function! s:ShowFails()
+    if (len(g:session_errors) == 0)
+        call s:Echo("There are no failed tests from a previous run.")
+        return
+    endif
 	let winnr = bufwinnr('Fails.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . 'Fails.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
@@ -215,24 +219,20 @@ function! s:ShowFails()
     exe "normal i" . blank_line 
     hi RedBar ctermfg=white ctermbg=red guibg=red
     match RedBar /\%1l/
-    if (len(g:session_errors) == 0)
-        call setline(2, "There are currently no errors for a previous run.")
-    else
-        for err in keys(g:session_errors)
-            let err_dict = g:session_errors[err]
-            let line_number = err_dict['line']
-            let actual_error = err_dict['error']
-            let path_error = err_dict['path']
-            let ends = err_dict['file_path']
-            if (path_error == ends)
-                let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
-            else
-                let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error . "\t\tEnds On: " . ends
-            endif
-            let error_number = err + 1
-            call setline(error_number, message)    
-        endfor
-    endif
+    for err in keys(g:session_errors)
+        let err_dict = g:session_errors[err]
+        let line_number = err_dict['line']
+        let actual_error = err_dict['error']
+        let path_error = err_dict['path']
+        let ends = err_dict['file_path']
+        if (path_error == ends)
+            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
+        else
+            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error . "\t\tEnds On: " . ends
+        endif
+        let error_number = err + 1
+        call setline(error_number, message)    
+    endfor
 	silent! execute 'resize ' . line('$')
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
     call s:PytestFailsSyntax()
@@ -242,15 +242,15 @@ endfunction
 
 
 function! s:LastSession()
+    if (len(g:last_session) == 0)
+        call s:Echo("There is currently no saved last session to display.")
+        return
+    endif
 	let winnr = bufwinnr('LastSession.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . 'LastSession.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
-    if (len(g:last_session) == 0)
-        call setline(1, "There is currently no saved last session to display.")
-    else
-        let session = split(g:last_session, '\n')
-        call append(0, session)
-    endif
+    let session = split(g:last_session, '\n')
+    call append(0, session)
 	silent! execute 'resize ' . line('$')
     silent! execute 'normal gg'
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
@@ -268,6 +268,15 @@ function! s:ToggleFailWindow()
     endif
 endfunction
 
+function! s:ToggleLastSession()
+	let winnr = bufwinnr('LastSession.pytest')
+    if (winnr == -1)
+        call s:LastSession()
+    else
+        silent! execute winnr . 'wincmd w'
+        silent! execute 'q'
+    endif
+endfunction
 
 function! s:RunPyTest(path)
     let g:last_session = ""
@@ -455,7 +464,7 @@ function! s:Proxy(action, ...)
     elseif (a:action == "end")
         call s:GoToError(3)
     elseif (a:action == "session")
-        call s:LastSession()
+        call s:ToggleLastSession()
     endif
 endfunction
 
