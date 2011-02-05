@@ -225,10 +225,12 @@ function! s:ShowFails()
         let actual_error = err_dict['error']
         let path_error = err_dict['path']
         let ends = err_dict['file_path']
+        let raised_error = matchlist(actual_error, '\v(\w+):')
+        let actual_error = raised_error[1]
         if (path_error == ends)
-            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
+            let message = "Line: " . line_number . "\t==>> " . actual_error 
         else
-            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error . "\t\tEnds On: " . ends
+            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
         endif
         let error_number = err + 1
         call setline(error_number, message)    
@@ -346,10 +348,12 @@ function! s:RunPyTest(path)
             let actual_error = err_dict['error']
             let path_error = err_dict['path']
             let ends = err_dict['file_path']
+            let raised_error = matchlist(actual_error, '\v(\w+):')
+            let actual_error = raised_error[1]
             if (path_error == ends)
-                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error
+                echo "Line: " . line_number . "\t==>> " . actual_error 
             else
-                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tPath: " . path_error . "\t\tEnds On: " . ends
+                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
             endif
             let g:session_errors = errors
         endfor
