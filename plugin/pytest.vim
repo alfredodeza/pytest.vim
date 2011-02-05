@@ -228,7 +228,8 @@ function! s:ShowFails()
         let raised_error = matchlist(actual_error, '\v(\w+):')
         let actual_error = raised_error[1]
         if (path_error == ends)
-            let message = "Line: " . line_number . "\t==>> " . actual_error 
+            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
+
         else
             let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
         endif
@@ -351,7 +352,8 @@ function! s:RunPyTest(path)
             let raised_error = matchlist(actual_error, '\v(\w+):')
             let actual_error = raised_error[1]
             if (path_error == ends)
-                echo "Line: " . line_number . "\t==>> " . actual_error 
+                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
+
             else
                 echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
             endif
