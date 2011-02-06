@@ -115,7 +115,7 @@ function! s:GoToError(direction)
             return
         endif
     else
-        call s:Echo("Failed test list is empty.")
+        call s:Echo("Failed test list is empty")
     endif
 endfunction
 
@@ -215,7 +215,7 @@ endfunction
 
 function! s:ShowError()
     if (len(g:session_errors) == 0)
-        call s:Echo("No Failed test errors saved")
+        call s:Echo("No Failed test error from a previous run")
         return
     endif
     if (g:session_error == 0)
@@ -247,7 +247,7 @@ function! s:ShowFails(...)
         let gain_focus = 0
     endif
     if (len(g:session_errors) == 0)
-        call s:Echo("There are no failed tests from a previous run.")
+        call s:Echo("No failed tests from a previous run")
         return
     endif
 	let winnr = bufwinnr('Fails.pytest')
@@ -286,7 +286,7 @@ endfunction
 
 function! s:LastSession()
     if (len(g:last_session) == 0)
-        call s:Echo("There is currently no saved last session to display.")
+        call s:Echo("There is currently no saved last session to display")
         return
     endif
 	let winnr = bufwinnr('LastSession.pytest')
@@ -361,6 +361,8 @@ function! s:RunPyTest(path)
     let error['line'] = ""
     let error['path'] = ""
     let error['exception'] = ""
+    let g:chapa_debug_error = []
+    let g:chapa_debug_py_error = ""
     " Loop through the output and build the error dict
     for w in split(out, '\n')
         if ((error.line != "") && (error.path != "") && (error.exception != ""))
@@ -392,15 +394,16 @@ function! s:RunPyTest(path)
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.file_path = file_path[1]
             endif
-        elseif w =~  '\v^E\s+'
-            
+        elseif w =~  '\v^E\s+(\w+):\s+'
+            call insert(g:chapa_debug_error, w)        
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
             let error.exception = match_error[1]
             let error.error = match_error[2]
 
-        elseif w =~ '\v^(.*)\s+ERROR:\s+'
+        elseif w =~ '\v^(.*)\s*ERROR:\s+'
+            let g:chapa_debug_py_error = w
             let pytest_error = w
         endif
     endfor
@@ -441,10 +444,10 @@ function! s:ThisMethod(verbose)
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
     if (strlen(m_name) == 1)
-        call s:Echo("Unable to find a matching method for testing.")
+        call s:Echo("Unable to find a matching method for testing")
         return
     elseif (strlen(c_name) == 1)
-        call s:Echo("Unable to find a matching class for testing.")
+        call s:Echo("Unable to find a matching class for testing")
         return
     endif
 
@@ -464,7 +467,7 @@ function! s:ThisClass(verbose)
     let c_name      = s:NameOfCurrentClass()
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
-        call s:Echo("Unable to find a matching class for testing.")
+        call s:Echo("Unable to find a matching class for testing")
         return
     endif
     let message  = "py.test ==> Running tests for class " . c_name 
