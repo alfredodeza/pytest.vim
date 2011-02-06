@@ -207,7 +207,13 @@ function! s:OpenError(path)
 endfunction
 
 
-function! s:ShowFails()
+function! s:ShowFails(...)
+    au BufLeave *.pytest echo "" | redraw
+    if a:0 > 0
+        let gain_focus = a:0
+    else
+        let gain_focus = 0
+    endif
     if (len(g:session_errors) == 0)
         call s:Echo("There are no failed tests from a previous run.")
         return
@@ -229,7 +235,6 @@ function! s:ShowFails()
         let actual_error = raised_error[1]
         if (path_error == ends)
             let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
-
         else
             let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
         endif
@@ -238,9 +243,14 @@ function! s:ShowFails()
     endfor
 	silent! execute 'resize ' . line('$')
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+    silent! execute 'nnoremap <silent> <buffer> <Enter> :q! <CR>'
     call s:PytestFailsSyntax()
     exe "normal 0|h"
-    exe 'wincmd w'
+    if (! gain_focus)
+        exe 'wincmd w'
+    else
+        call s:Echo("Hit Return or q to exit", 1)
+    endif
 endfunction
 
 
@@ -342,23 +352,24 @@ function! s:RunPyTest(path)
     
     " Display the result Bars
     if (failed == 1)
-        call s:RedBar()
-        for err in keys(errors)
-            let err_dict = errors[err]
-            let line_number = err_dict['line']
-            let actual_error = err_dict['error']
-            let path_error = err_dict['path']
-            let ends = err_dict['file_path']
-            let raised_error = matchlist(actual_error, '\v(\w+):')
-            let actual_error = raised_error[1]
-            if (path_error == ends)
-                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
-
-            else
-                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
-            endif
+"        call s:RedBar()
+"        for err in keys(errors)
+"            let err_dict = errors[err]
+"            let line_number = err_dict['line']
+"            let actual_error = err_dict['error']
+"            let path_error = err_dict['path']
+"            let ends = err_dict['file_path']
+"            let raised_error = matchlist(actual_error, '\v(\w+):')
+"            let actual_error = raised_error[1]
+"            if (path_error == ends)
+"                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
+"
+"            else
+"                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
+"            endif
             let g:session_errors = errors
-        endfor
+            call s:ShowFails(1)
+"        endfor
     elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
     elseif (pytest_error != "")
