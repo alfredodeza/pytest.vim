@@ -361,8 +361,6 @@ function! s:RunPyTest(path)
     let error['line'] = ""
     let error['path'] = ""
     let error['exception'] = ""
-    let g:chapa_debug_error = []
-    let g:chapa_debug_py_error = ""
     " Loop through the output and build the error dict
     for w in split(out, '\n')
         if ((error.line != "") && (error.path != "") && (error.exception != ""))
@@ -395,7 +393,6 @@ function! s:RunPyTest(path)
                 let error.file_path = file_path[1]
             endif
         elseif w =~  '\v^E\s+(\w+):\s+'
-            call insert(g:chapa_debug_error, w)        
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
@@ -403,7 +400,6 @@ function! s:RunPyTest(path)
             let error.error = match_error[2]
 
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
-            let g:chapa_debug_py_error = w
             let pytest_error = w
         endif
     endfor
