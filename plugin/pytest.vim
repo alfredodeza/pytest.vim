@@ -352,24 +352,8 @@ function! s:RunPyTest(path)
     
     " Display the result Bars
     if (failed == 1)
-"        call s:RedBar()
-"        for err in keys(errors)
-"            let err_dict = errors[err]
-"            let line_number = err_dict['line']
-"            let actual_error = err_dict['error']
-"            let path_error = err_dict['path']
-"            let ends = err_dict['file_path']
-"            let raised_error = matchlist(actual_error, '\v(\w+):')
-"            let actual_error = raised_error[1]
-"            if (path_error == ends)
-"                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
-"
-"            else
-"                echo "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
-"            endif
             let g:session_errors = errors
             call s:ShowFails(1)
-"        endfor
     elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
     elseif (pytest_error != "")
