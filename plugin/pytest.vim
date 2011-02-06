@@ -62,6 +62,7 @@ function! s:GoToError(direction)
     " direction     == -1 goes backwards
     " directtion    ==  2 goes to last
     " directtion    ==  3 goes to the end of current error
+    call s:ClearAll()
     if (len(g:session_errors) > 0)
         if (a:direction == -1)
             if (g:session_error == 0 || g:session_error == 1)
@@ -84,6 +85,7 @@ function! s:GoToError(direction)
             let select_error = g:session_errors[g:session_error]
             let line_number = select_error['file_line']
             let error_path = select_error['file_path']
+            let exception = select_error['exception']
             let file_name = expand("%:t")
             if error_path =~ file_name
                 execute line_number
@@ -91,14 +93,16 @@ function! s:GoToError(direction)
                 call s:OpenError(error_path)
                 execute line_number
             endif
-            let message = "End of Failed test: " . g:session_error . "\t at line ==>> " . line_number
+            let message = "End of Failed test: " . g:session_error . "\t ==>> " . exception
             call s:Echo(message, 1)
+            return
         endif
 
         if (a:direction != 3)
             let select_error = g:session_errors[g:session_error]
             let line_number = select_error['line']
             let error_path = select_error['path']
+            let exception = select_error['exception']
             let file_name = expand("%:t")
             if error_path =~ file_name
                 execute line_number
@@ -106,8 +110,9 @@ function! s:GoToError(direction)
                 call s:OpenError(error_path)
                 execute line_number
             endif
-            let message = "Failed test: " . g:session_error . "\t at line ==>> " . line_number
+            let message = "Failed test: " . g:session_error . "\t ==>> " . exception
             call s:Echo(message, 1)
+            return
         endif
     else
         call s:Echo("Failed test list is empty.")
@@ -204,6 +209,33 @@ function! s:OpenError(path)
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number 
     silent! execute ":e " . a:path
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+    silent! execute ":file GoToError.pytest"
+endfunction
+
+
+function! s:ShowError()
+    if (len(g:session_errors) == 0)
+        call s:Echo("No Failed test errors saved")
+        return
+    endif
+    if (g:session_error == 0)
+        let error_n = 1
+    else
+        let error_n = g:session_error
+    endif
+	let winnr = bufwinnr('ShowError.pytest')
+	silent! execute  winnr < 0 ? 'botright new ' . ' ShowError.pytest' : winnr . 'wincmd w'
+	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile number filetype=python
+    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+    let error_dict = g:session_errors[error_n]
+    let line_number = error_dict['file_line']
+    let error = error_dict['error']
+    let message = "Test Error: " . error
+    call append(0, error)
+    exe '0'
+    exe '0|'
+    silent! execute 'resize ' . line('$')
+    exe 'wincmd p'
 endfunction
 
 
@@ -288,6 +320,28 @@ function! s:ToggleLastSession()
         silent! execute 'q'
     endif
 endfunction
+
+function! s:ToggleShowError()
+	let winnr = bufwinnr('ShowError.pytest')
+    if (winnr == -1)
+        call s:ShowError()
+    else
+        silent! execute winnr . 'wincmd w'
+        silent! execute 'q'
+    endif
+endfunction
+
+function! s:ClearAll()
+    let bufferL = [ 'Fails.pytest', 'LastSession.pytest', 'ShowError.pytest', 'PytestVerbose.pytest' ]
+    for b in bufferL
+        let winnr = bufwinnr(b)
+        if (winnr != -1)
+            silent! execute winnr . 'wincmd w'
+            silent! execute 'q'
+        endif
+    endfor
+endfunction
+
 
 function! s:RunPyTest(path)
     let g:last_session = ""
@@ -448,10 +502,13 @@ function! s:Proxy(action, ...)
         let verbose = 0
     endif
     if (a:action == "class")
+        call s:ClearAll()
         call s:ThisClass(verbose)
     elseif (a:action == "method")
+        call s:ClearAll()
         call s:ThisMethod(verbose)
     elseif (a:action == "file")
+        call s:ClearAll()
         call s:ThisFile(verbose)
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
@@ -467,6 +524,8 @@ function! s:Proxy(action, ...)
         call s:GoToError(3)
     elseif (a:action == "session")
         call s:ToggleLastSession()
+    elseif (a:action == "error")
+        call s:ToggleShowError()
     endif
 endfunction
 
