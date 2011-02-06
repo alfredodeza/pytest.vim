@@ -57,11 +57,11 @@ endfunction
 
 
 function! s:GoToError(direction)
-    " direction == 0 goes to first
-    " direction ==  1 goes forward
-    " direction == -1 goes backwards
-    " directtion == 2 goes to last
-    " directtion == 3 goes to the end of current error
+    " direction     ==  0 goes to first
+    " direction     ==  1 goes forward
+    " direction     == -1 goes backwards
+    " directtion    ==  2 goes to last
+    " directtion    ==  3 goes to the end of current error
     if (len(g:session_errors) > 0)
         if (a:direction == -1)
             if (g:session_error == 0 || g:session_error == 1)
@@ -228,15 +228,13 @@ function! s:ShowFails(...)
     for err in keys(g:session_errors)
         let err_dict = g:session_errors[err]
         let line_number = err_dict['line']
-        let actual_error = err_dict['error']
+        let exception = err_dict['exception']
         let path_error = err_dict['path']
         let ends = err_dict['file_path']
-        let raised_error = matchlist(actual_error, '\v(\w+):')
-        let actual_error = raised_error[1]
         if (path_error == ends)
-            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . "./".path_error
+            let message = "Line: " . line_number . "\t==>> " . exception . "\t\tEnds On: " . "./".path_error
         else
-            let message = "Line: " . line_number . "\t==>> " . actual_error . "\t\tEnds On: " . ends
+            let message = "Line: " . line_number . "\t==>> " . exception . "\t\tEnds On: " . ends
         endif
         let error_number = err + 1
         call setline(error_number, message)    
@@ -308,10 +306,10 @@ function! s:RunPyTest(path)
     let current_file = expand("%:t")
     let error['line'] = ""
     let error['path'] = ""
-    let error['error'] = ""
+    let error['exception'] = ""
     " Loop through the output and build the error dict
     for w in split(out, '\n')
-        if ((error.line != "") && (error.path != "") && (error.error != ""))
+        if ((error.line != "") && (error.path != "") && (error.exception != ""))
             try
                 let end_file_path = error['file_path']
             catch /^Vim\%((\a\+)\)\=:E/
@@ -323,7 +321,7 @@ function! s:RunPyTest(path)
             let error = {}
             let error['line'] = ""
             let error['path'] = ""
-            let error['error'] = ""
+            let error['exception'] = ""
         endif
 
         if w =~ 'FAILURES'
@@ -341,9 +339,12 @@ function! s:RunPyTest(path)
                 let error.file_path = file_path[1]
             endif
         elseif w =~  '\v^E\s+'
+            
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
-            let error.error = actual_error
+            let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
+            let error.exception = match_error[1]
+            let error.error = match_error[2]
 
         elseif w =~ '\v^(.*)\s+ERROR:\s+'
             let pytest_error = w
@@ -352,8 +353,8 @@ function! s:RunPyTest(path)
     
     " Display the result Bars
     if (failed == 1)
-            let g:session_errors = errors
-            call s:ShowFails(1)
+        let g:session_errors = errors
+        call s:ShowFails(1)
     elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
     elseif (pytest_error != "")
