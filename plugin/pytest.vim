@@ -223,11 +223,16 @@ function! s:ShowError()
     else
         let error_n = g:session_error
     endif
+    let error_dict = g:session_errors[error_n]
+    if (error_dict['error'] == 0)
+        call s:Echo("No failed test error saved from last run.")
+        return
+    endif
+
 	let winnr = bufwinnr('ShowError.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . ' ShowError.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile number filetype=python
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
-    let error_dict = g:session_errors[error_n]
     let line_number = error_dict['file_line']
     let error = error_dict['error']
     let message = "Test Error: " . error
@@ -361,10 +366,9 @@ function! s:RunPyTest(path)
         elseif w =~ '\v\s+(ERRORS)\s+'
             call s:ParseErrors(out)
             return
-        else
-            call s:GreenBar()
         endif
     endfor
+    call s:GreenBar()
 endfunction
 
 
@@ -468,6 +472,7 @@ function! s:ParseErrors(stdout)
             let split_error = split(w, "E ")
             let match_error = matchlist(split_error[0], '\v(\w+):')
             let error['exception'] = match_error[1]
+            let error.error = ""
             echo match_error[1]
         endif
     endfor
