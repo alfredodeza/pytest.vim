@@ -224,7 +224,7 @@ function! s:ShowError()
         let error_n = g:session_error
     endif
     let error_dict = g:session_errors[error_n]
-    if (error_dict['error'] == 0)
+    if (error_dict['error'] == "")
         call s:Echo("No failed test error saved from last run.")
         return
     endif
@@ -365,6 +365,10 @@ function! s:RunPyTest(path)
             return
         elseif w =~ '\v\s+(ERRORS)\s+'
             call s:ParseErrors(out)
+            return
+        elseif w =~ '\v^(.*)\s*ERROR:\s+'
+            call s:RedBar()
+            echo "py.test " . w
             return
         endif
     endfor
