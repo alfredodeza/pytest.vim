@@ -476,8 +476,8 @@ function! s:ParseErrors(stdout)
             let split_error = split(w, "E ")
             let match_error = matchlist(split_error[0], '\v(\w+):')
             let error['exception'] = match_error[1]
-            let error.error = ""
-            echo match_error[1]
+            let flat_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
+            let error.error = flat_error
         endif
     endfor
     let errors[1] = error
