@@ -26,10 +26,10 @@ function! s:PytestSyntax() abort
   syn match PytestPythonFile            "\v((.*.py\s+))"
   syn match PytestFooterFail            "\v\s+((.*)(failed|error) in(.*))\s+"
   syn match PytestFooter                "\v\s+((.*)passed in(.*))\s+"
-  syn match PytestFileNumber            "\v^((.*)\.py)"
   syn match PytestFailures              "\v\s+(FAILURES|ERRORS)\s+"
   syn match PytestErrors                "\v^E\s+(.*)"
-  syn match PytestDelimiter               "\v_{2,}"
+  syn match PytestDelimiter             "\v_{3,}"
+  syn match PytestFailedTest            "\v_{3,}\s+(.*)\s+_{3,}"
 
 
   hi def link PytestPythonFile          String
@@ -39,10 +39,10 @@ function! s:PytestSyntax() abort
   hi def link PytestTitle               String
   hi def link PytestFooterFail          String
   hi def link PytestFooter              String
-  hi def link PytestFileNumber          Function
-  hi def link PytestFailures            Function
-  hi def link PytestErrors              Function
+  hi def link PytestFailures            Number
+  hi def link PytestErrors              Number
   hi def link PytestDelimiter           Comment
+  hi def link PytestFailedTest          Comment
 endfunction
 
 
