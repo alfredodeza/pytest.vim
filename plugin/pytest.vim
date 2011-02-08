@@ -307,6 +307,7 @@ function! s:LastSession()
     silent! execute 'normal gg'
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
     call s:PytestSyntax()
+    exe 'wincmd p'
 endfunction
 
 
