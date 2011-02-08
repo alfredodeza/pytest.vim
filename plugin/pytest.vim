@@ -5,84 +5,88 @@
 " License:     MIT
 "============================================================================
 
+
 if exists("g:loaded_pytest") || &cp 
   finish
 endif
 
 
 " Global variables for registering next/previous error
-let g:session_errors = {}
-let g:session_error = 0
-let g:last_session = ""
+let g:pytest_session_errors    = {}
+let g:pytest_session_error     = 0
+let g:pytest_last_session      = ""
+
 
 function! s:PytestSyntax() abort
   let b:current_syntax = 'pytest'
-  syn match PytestPlatform          '\v^(platform(.*))'
-  syn match PytestTitleDecoration   "\v\={2,}"
-  syn match PytestTitle             "\v\s+(test session starts)\s+"
-  syn match PytestCollecting        "\v(collecting\s+(.*))"
-  syn match PytestPythonFile        "\v((.*.py\s+))"
-  syn match PytestFooterFail        "\v\s+((.*)failed in(.*))\s+"
-  syn match PytestFooter            "\v\s+((.*)passed in(.*))\s+"
-  syn match PytestFileNumber        "\v^((.*)\.py)"
-  syn match PytestFailures          "\v\s+(FAILURES)\s+"
-  syn match PytestErrors            "\v^E\s+(.*)"
+  syn match PytestPlatform              '\v^(platform(.*))'
+  syn match PytestTitleDecoration       "\v\={2,}"
+  syn match PytestTitle                 "\v\s+(test session starts)\s+"
+  syn match PytestCollecting            "\v(collecting\s+(.*))"
+  syn match PytestPythonFile            "\v((.*.py\s+))"
+  syn match PytestFooterFail            "\v\s+((.*)(failed|error) in(.*))\s+"
+  syn match PytestFooter                "\v\s+((.*)passed in(.*))\s+"
+  syn match PytestFileNumber            "\v^((.*)\.py)"
+  syn match PytestFailures              "\v\s+(FAILURES|ERRORS)\s+"
+  syn match PytestErrors                "\v^E\s+(.*)"
+  syn match PytestDelimiter               "\v_{2,}"
 
-  hi def link PytestPythonFile         String
-  hi def link PytestPlatform           String
-  hi def link PytestCollecting         String
-  hi def link PytestTitleDecoration    Comment
-  hi def link PytestTitle              String
-  hi def link PytestFooterFail         String
-  hi def link PytestFooter             String
-  hi def link PytestFileNumber         Function
-  hi def link PytestFailures           Function
-  hi def link PytestErrors             Function
 
+  hi def link PytestPythonFile          String
+  hi def link PytestPlatform            String
+  hi def link PytestCollecting          String
+  hi def link PytestTitleDecoration     Comment
+  hi def link PytestTitle               String
+  hi def link PytestFooterFail          String
+  hi def link PytestFooter              String
+  hi def link PytestFileNumber          Function
+  hi def link PytestFailures            Function
+  hi def link PytestErrors              Function
+  hi def link PytestDelimiter           Comment
 endfunction
 
 
 function! s:PytestFailsSyntax() abort
   let b:current_syntax = 'pytestFails'
-  syn match PytestQDelimiter         "\v\s+(\=\=\>\>)\s+"
-  syn match PytestQLine              "Line:"
-  syn match PytestQPath              "\v\s+(Path:)\s+"
-  syn match PytestQEnds              "\v\s+(Ends On:)\s+"
+  syn match PytestQDelimiter            "\v\s+(\=\=\>\>)\s+"
+  syn match PytestQLine                 "Line:"
+  syn match PytestQPath                 "\v\s+(Path:)\s+"
+  syn match PytestQEnds                 "\v\s+(Ends On:)\s+"
 
-  hi def link PytestQDelimiter         Comment
-  hi def link PytestQLine              String
-  hi def link PytestQPath              String
-  hi def link PytestQEnds              String
+  hi def link PytestQDelimiter          Comment
+  hi def link PytestQLine               String
+  hi def link PytestQPath               String
+  hi def link PytestQEnds               String
 endfunction
 
 
 function! s:GoToError(direction)
-    " direction     ==  0 goes to first
-    " direction     ==  1 goes forward
-    " direction     == -1 goes backwards
-    " directtion    ==  2 goes to last
-    " directtion    ==  3 goes to the end of current error
+    "   0 goes to first
+    "   1 goes forward
+    "  -1 goes backwards
+    "   2 goes to last
+    "   3 goes to the end of current error
     call s:ClearAll()
-    if (len(g:session_errors) > 0)
+    if (len(g:pytest_session_errors) > 0)
         if (a:direction == -1)
-            if (g:session_error == 0 || g:session_error == 1)
-                let g:session_error = 1
+            if (g:pytest_session_error == 0 || g:pytest_session_error == 1)
+                let g:pytest_session_error = 1
             else
-                let g:session_error = g:session_error - 1
+                let g:pytest_session_error = g:pytest_session_error - 1
             endif
         elseif (a:direction == 1)
-            if (g:session_error != len(g:session_errors))
-                let g:session_error = g:session_error + 1
+            if (g:pytest_session_error != len(g:pytest_session_errors))
+                let g:pytest_session_error = g:pytest_session_error + 1
             endif
         elseif (a:direction == 0)
-            let g:session_error = 1
+            let g:pytest_session_error = 1
         elseif (a:direction == 2)
-            let g:session_error = len(g:session_errors)
+            let g:pytest_session_error = len(g:pytest_session_errors)
         elseif (a:direction == 3)
-            if (g:session_error == 0 || g:session_error == 1)
-                let g:session_error = 1
+            if (g:pytest_session_error == 0 || g:pytest_session_error == 1)
+                let g:pytest_session_error = 1
             endif
-            let select_error = g:session_errors[g:session_error]
+            let select_error = g:pytest_session_errors[g:pytest_session_error]
             let line_number = select_error['file_line']
             let error_path = select_error['file_path']
             let exception = select_error['exception']
@@ -93,13 +97,13 @@ function! s:GoToError(direction)
                 call s:OpenError(error_path)
                 execute line_number
             endif
-            let message = "End of Failed test: " . g:session_error . "\t ==>> " . exception
+            let message = "End of Failed test: " . g:pytest_session_error . "\t ==>> " . exception
             call s:Echo(message, 1)
             return
         endif
 
         if (a:direction != 3)
-            let select_error = g:session_errors[g:session_error]
+            let select_error = g:pytest_session_errors[g:pytest_session_error]
             let line_number = select_error['line']
             let error_path = select_error['path']
             let exception = select_error['exception']
@@ -110,7 +114,7 @@ function! s:GoToError(direction)
                 call s:OpenError(error_path)
                 execute line_number
             endif
-            let message = "Failed test: " . g:session_error . "\t ==>> " . exception
+            let message = "Failed test: " . g:pytest_session_error . "\t ==>> " . exception
             call s:Echo(message, 1)
             return
         endif
@@ -214,16 +218,16 @@ endfunction
 
 
 function! s:ShowError()
-    if (len(g:session_errors) == 0)
+    if (len(g:pytest_session_errors) == 0)
         call s:Echo("No Failed test error from a previous run")
         return
     endif
-    if (g:session_error == 0)
+    if (g:pytest_session_error == 0)
         let error_n = 1
     else
-        let error_n = g:session_error
+        let error_n = g:pytest_session_error
     endif
-    let error_dict = g:session_errors[error_n]
+    let error_dict = g:pytest_session_errors[error_n]
     if (error_dict['error'] == "")
         call s:Echo("No failed test error saved from last run.")
         return
@@ -251,7 +255,7 @@ function! s:ShowFails(...)
     else
         let gain_focus = 0
     endif
-    if (len(g:session_errors) == 0)
+    if (len(g:pytest_session_errors) == 0)
         call s:Echo("No failed tests from a previous run")
         return
     endif
@@ -262,8 +266,8 @@ function! s:ShowFails(...)
     exe "normal i" . blank_line 
     hi RedBar ctermfg=white ctermbg=red guibg=red
     match RedBar /\%1l/
-    for err in keys(g:session_errors)
-        let err_dict = g:session_errors[err]
+    for err in keys(g:pytest_session_errors)
+        let err_dict = g:pytest_session_errors[err]
         let line_number = err_dict['line']
         let exception = err_dict['exception']
         let path_error = err_dict['path']
@@ -290,14 +294,14 @@ endfunction
 
 
 function! s:LastSession()
-    if (len(g:last_session) == 0)
+    if (len(g:pytest_last_session) == 0)
         call s:Echo("There is currently no saved last session to display")
         return
     endif
 	let winnr = bufwinnr('LastSession.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . 'LastSession.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
-    let session = split(g:last_session, '\n')
+    let session = split(g:pytest_last_session, '\n')
     call append(0, session)
 	silent! execute 'resize ' . line('$')
     silent! execute 'normal gg'
@@ -316,6 +320,7 @@ function! s:ToggleFailWindow()
     endif
 endfunction
 
+
 function! s:ToggleLastSession()
 	let winnr = bufwinnr('LastSession.pytest')
     if (winnr == -1)
@@ -326,6 +331,7 @@ function! s:ToggleLastSession()
     endif
 endfunction
 
+
 function! s:ToggleShowError()
 	let winnr = bufwinnr('ShowError.pytest')
     if (winnr == -1)
@@ -335,6 +341,7 @@ function! s:ToggleShowError()
         silent! execute 'q'
     endif
 endfunction
+
 
 function! s:ClearAll()
     let bufferL = [ 'Fails.pytest', 'LastSession.pytest', 'ShowError.pytest', 'PytestVerbose.pytest' ]
@@ -349,14 +356,14 @@ endfunction
 
 
 function! s:RunPyTest(path)
-    let g:last_session = ""
+    let g:pytest_last_session = ""
     let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
     
     " Pointers and default variables
-    let g:session_errors = {}
-    let g:session_error = 0
-    let g:last_session = out
+    let g:pytest_session_errors = {}
+    let g:pytest_session_error = 0
+    let g:pytest_last_session = out
     " Loop through the output and build the error dict
 
     for w in split(out, '\n')
@@ -440,7 +447,7 @@ function! s:ParseFailures(stdout)
 
     " Display the result Bars
     if (failed == 1)
-        let g:session_errors = errors
+        let g:pytest_session_errors = errors
         call s:ShowFails(1)
     elseif (failed == 0 && pytest_error == "")
         call s:GreenBar()
@@ -484,7 +491,7 @@ function! s:ParseErrors(stdout)
 
     " Display the result Bars
     if (failed == 1)
-        let g:session_errors = errors
+        let g:pytest_session_errors = errors
         call s:ShowFails(1)
     elseif (failed == 0)
         call s:GreenBar()
