@@ -31,7 +31,6 @@ function! s:PytestSyntax() abort
   syn match PytestDelimiter             "\v_{3,}"
   syn match PytestFailedTest            "\v_{3,}\s+(.*)\s+_{3,}"
 
-
   hi def link PytestPythonFile          String
   hi def link PytestPlatform            String
   hi def link PytestCollecting          String
@@ -213,7 +212,6 @@ function! s:OpenError(path)
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number 
     silent! execute ":e " . a:path
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
-    silent! execute ":file GoToError.pytest"
 endfunction
 
 
@@ -286,7 +284,7 @@ function! s:ShowFails(...)
     call s:PytestFailsSyntax()
     exe "normal 0|h"
     if (! gain_focus)
-        exe 'wincmd w'
+        exe 'wincmd p'
     else
         call s:Echo("Hit Return or q to exit", 1)
     endif
@@ -349,7 +347,7 @@ function! s:ClearAll()
     for b in bufferL
         let winnr = bufwinnr(b)
         if (winnr != -1)
-            silent! execute winnr . 'wincmd w'
+            silent! execute winnr . 'wincmd p'
             silent! execute 'q'
         endif
     endfor
