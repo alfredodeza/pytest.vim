@@ -431,15 +431,12 @@ function! s:ParseFailures(stdout)
                 let error.file_line = match_result[1]
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.file_path = file_path[1]
-
             endif
         elseif w =~  '\v^E\s+(.*)\s+'
             call insert(g:chapa_debug_error, w)        
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
-            let g:FOO = match_error
-            let g:BAR = actual_error
             if (len(match_error))
                 let error.exception = match_error[1]
                 let error.error = match_error[2]
