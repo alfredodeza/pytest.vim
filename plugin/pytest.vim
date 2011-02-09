@@ -438,9 +438,15 @@ function! s:ParseFailures(stdout)
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
-            let error.exception = match_error[1]
-            let error.error = match_error[2]
-
+            let g:FOO = match_error
+            let g:BAR = actual_error
+            if (len(match_error))
+                let error.exception = match_error[1]
+                let error.error = match_error[2]
+            else
+                let error.exception = "UnmatchedException"
+                let error.error = actual_error
+            endif
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
             let pytest_error = w
         endif
