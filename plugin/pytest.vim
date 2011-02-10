@@ -573,8 +573,18 @@ function! s:ThisFile(verbose)
 endfunction
     
 
+function! s:Version()
+    call s:Echo("pytest.vim version 0.0.5", 1)
+endfunction
+
+
 function! s:Completion(ArgLead, CmdLine, CursorPos)
-    return "class\nmethod\nfile\nverbose\nnext\nprevious\nfirst\nlast\nsession\nend\nerror\nfails\n"
+    let result_order = "first\nlast\nnext\nprevious\n"
+    let test_objects = "class\nmethod\nfile\n"
+    let optional     = "verbose\n"
+    let reports      = "fails\nerror\nsession\nend\n"
+    let pyversion    = "version\n"
+    return test_objects . result_order . reports . optional . pyversion
 endfunction
 
 
@@ -609,6 +619,8 @@ function! s:Proxy(action, ...)
         call s:ToggleLastSession()
     elseif (a:action == "error")
         call s:ToggleShowError()
+    elseif (a:action == "version")
+        call s:Version()
     endif
 endfunction
 
