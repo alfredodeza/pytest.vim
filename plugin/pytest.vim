@@ -66,20 +66,24 @@ function! s:GoToError(direction)
     "   2 goes to last
     "   3 goes to the end of current error
     call s:ClearAll()
+    let going = "First"
     if (len(g:pytest_session_errors) > 0)
         if (a:direction == -1)
+            let going = "Previous"
             if (g:pytest_session_error == 0 || g:pytest_session_error == 1)
                 let g:pytest_session_error = 1
             else
                 let g:pytest_session_error = g:pytest_session_error - 1
             endif
         elseif (a:direction == 1)
+            let going = "Next"
             if (g:pytest_session_error != len(g:pytest_session_errors))
                 let g:pytest_session_error = g:pytest_session_error + 1
             endif
         elseif (a:direction == 0)
             let g:pytest_session_error = 1
         elseif (a:direction == 2)
+            let going = "Last"
             let g:pytest_session_error = len(g:pytest_session_errors)
         elseif (a:direction == 3)
             if (g:pytest_session_error == 0 || g:pytest_session_error == 1)
@@ -113,7 +117,7 @@ function! s:GoToError(direction)
                 call s:OpenError(error_path)
                 execute line_number
             endif
-            let message = "Failed test: " . g:pytest_session_error . "\t ==>> " . exception
+            let message = going . " Failed test: " . g:pytest_session_error . "\t ==>> " . exception
             call s:Echo(message, 1)
             return
         endif
@@ -390,6 +394,7 @@ function! s:ParseFailures(stdout)
     let error_number = 0
     let pytest_error = ""
     let current_file = expand("%:t")
+    let file_regex =  '\v(^' . current_file . '|/' . current_file . ')'
     let error['line'] = ""
     let error['path'] = ""
     let error['exception'] = ""
@@ -416,14 +421,13 @@ function! s:ParseFailures(stdout)
         if w =~ '\v\s+(FAILURES)\s+'
             let failed = 1
         elseif w =~ '\v^(.*)\.py:(\d+):'
-            call insert(g:chapa_debug_file, w)
-            if w =~ current_file
+            if w =~ file_regex
                 call insert(g:chapa_debug_file, w)
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.line = match_result[1]
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.path = file_path[1]
-            elseif w !~ current_file
+            elseif w !~ file_regex
                 call insert(g:chapa_debug_not_file, w)
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.file_line = match_result[1]
