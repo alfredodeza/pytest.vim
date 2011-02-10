@@ -8,6 +8,9 @@ it would be neat to be able to call it from vim and get some immediate results.
 This is especially useful when you are tweaking and do not want to be moving
 around between the terminal and your vim session.
 
+Screencast:
+http://vimeo.com/19774046
+
 Screenshots:
 
 Failing Tests
@@ -64,7 +67,8 @@ When tests are successful a green bar appears. If you have any number of fails
 you get a red bar with a line-by-line list of line numbers and errors.
 
 I strongly encourage a mapping for the above actions. For example, if you
-wanted leader mappings you would probably do them like this::
+wanted leader (the leader key is '\' by default) mappings you would 
+probably do them like this::
 
     " Pytest
     nmap <silent><Leader>f <Esc>:Pytest file<CR>
@@ -101,7 +105,14 @@ you would need to provide for such actions are::
     fails
 
 ``session`` is the buffer with a similar output to the terminal (but with
-syntax highlighting) and ``fails`` has the list of last failed errors.
+syntax highlighting) and ``fails`` has the list of last fails with the
+exceptions.
+
+If you are looking for the actual error, we have stripped it from the normal
+reporting but you can call it at any time with::
+
+    :Pytest error
+
 
 The reason behind this is that as soon as you hit any key, the quick display
 goes away. With a split buffer you are in control and you can quit that window

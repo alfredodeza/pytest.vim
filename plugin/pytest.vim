@@ -275,9 +275,9 @@ function! s:ShowFails(...)
         let path_error = err_dict['path']
         let ends = err_dict['file_path']
         if (path_error == ends)
-            let message = "Line: " . line_number . "\t\t==>> " . exception . "\t\tEnds On: " . path_error
+            let message = "Line: " . line_number . "\t==>> " . exception . "\t\t Ends On: " . path_error
         else
-            let message = "Line: " . line_number . "\t\t==>> " . exception . "\t\tEnds On: " . ends
+            let message = "Line: " . line_number . "\t==>> " . exception . "\t\t Ends On: " . ends
         endif
         let error_number = err + 1
         call setline(error_number, message)    
