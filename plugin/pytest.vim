@@ -250,6 +250,12 @@ function! s:ShowError()
 endfunction
 
 
+function! s:Pad(s, amt)
+    let padded =  a:s . repeat(' ', a:amt-len(a:s))
+    return padded
+endfunction
+
+
 function! s:ShowFails(...)
     au BufLeave *.pytest echo "" | redraw
     if a:0 > 0
@@ -269,15 +275,15 @@ function! s:ShowFails(...)
     hi RedBar ctermfg=white ctermbg=red guibg=red
     match RedBar /\%1l/
     for err in keys(g:pytest_session_errors)
-        let err_dict = g:pytest_session_errors[err]
-        let line_number = err_dict['line']
-        let exception = err_dict['exception']
-        let path_error = err_dict['path']
-        let ends = err_dict['file_path']
+        let err_dict    = g:pytest_session_errors[err]
+        let line_number = s:Pad(err_dict['line'], 10)
+        let exception   = s:Pad(err_dict['exception'], 25)
+        let path_error  = err_dict['path']
+        let ends        = err_dict['file_path']
         if (path_error == ends)
-            let message = "Line: " . line_number . "\t==>> " . exception . "\t\t Ends On: " . path_error
+            let message = "Line: " . line_number . "==>> " . exception . "Ends On: " . path_error
         else
-            let message = "Line: " . line_number . "\t==>> " . exception . "\t\t Ends On: " . ends
+            let message = "Line: " . line_number . "==>> " . exception . "Ends On: " . ends
         endif
         let error_number = err + 1
         call setline(error_number, message)    
