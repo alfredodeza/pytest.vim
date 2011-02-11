@@ -398,9 +398,6 @@ function! s:ParseFailures(stdout)
     let error['line'] = ""
     let error['path'] = ""
     let error['exception'] = ""
-    let g:chapa_debug_error = []
-    let g:chapa_debug_file = []
-    let g:chapa_debug_not_file = []
     " Loop through the output and build the error dict
     for w in split(a:stdout, '\n')
         if ((error.line != "") && (error.path != "") && (error.exception != ""))
@@ -422,20 +419,17 @@ function! s:ParseFailures(stdout)
             let failed = 1
         elseif w =~ '\v^(.*)\.py:(\d+):'
             if w =~ file_regex
-                call insert(g:chapa_debug_file, w)
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.line = match_result[1]
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.path = file_path[1]
             elseif w !~ file_regex
-                call insert(g:chapa_debug_not_file, w)
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.file_line = match_result[1]
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.file_path = file_path[1]
             endif
         elseif w =~  '\v^E\s+(.*)\s+'
-            call insert(g:chapa_debug_error, w)        
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
@@ -478,13 +472,16 @@ function! s:ParseErrors(stdout)
             let match_line_no = matchlist(w, '\v\s+(line)\s+(\d+)')
             let error['line'] = match_line_no[2]
             let error['file_line'] = match_line_no[2]
-
             let split_file = split(w, "E ")
             let match_file = matchlist(split_file[0], '\v"(.*.py)"')
             let error['file_path'] = match_file[1]
             let error['path'] = match_file[1]
+        elseif w =~ '\v^(.*)\.py:(\d+):'
+            let match_result = matchlist(w, '\v:(\d+):')
+            let error.line = match_result[1]
+            let file_path = matchlist(w, '\v(.*.py):')
+            let error.path = file_path[1]
         endif
-
         if w =~ '\v^E\s+(\w+):\s+'
             let split_error = split(w, "E ")
             let match_error = matchlist(split_error[0], '\v(\w+):')
@@ -493,6 +490,12 @@ function! s:ParseErrors(stdout)
             let error.error = flat_error
         endif
     endfor
+    try
+        let end_file_path = error['file_path']
+    catch /^Vim\%((\a\+)\)\=:E/
+        let error.file_path = error.path
+        let error.file_line = error.line
+    endtry
     let errors[1] = error
 
     " Display the result Bars
