@@ -318,7 +318,7 @@ function! s:ToggleFailWindow()
     if (winnr == -1)
         call s:ShowFails()
     else
-        silent! execute winnr . 'wincmd w'
+        silent! execute winnr . 'wincmd p'
         silent! execute 'q'
     endif
 endfunction
@@ -329,7 +329,7 @@ function! s:ToggleLastSession()
     if (winnr == -1)
         call s:LastSession()
     else
-        silent! execute winnr . 'wincmd w'
+        silent! execute winnr . 'wincmd p'
         silent! execute 'q'
     endif
 endfunction
@@ -340,7 +340,7 @@ function! s:ToggleShowError()
     if (winnr == -1)
         call s:ShowError()
     else
-        silent! execute winnr . 'wincmd w'
+        silent! execute winnr . 'wincmd p'
         silent! execute 'q'
     endif
 endfunction
