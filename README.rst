@@ -1,5 +1,5 @@
 pytest.vim
-----------
+==========
 A simple way of running your tests (with py.test) from within VIM.
 
 Talking with Holger Krekel (original author of py.test and vim user) we thought
@@ -23,7 +23,7 @@ Verbose Mode
 http://www.flickr.com/photos/aldegaz/5398148049/
 
 Usage
------
+=====
 
 This plugin provides a single command::
 
@@ -31,6 +31,8 @@ This plugin provides a single command::
 
 All arguments are able to be tab-completed.
 
+Python Objects
+--------------
 For running tests the plugin provides 3 arguments with an optional one. 
 These arguments are::
 
@@ -76,6 +78,8 @@ probably do them like this::
     nmap <silent><Leader>m <Esc>:Pytest method<CR>
 
 
+Errors and Fails
+----------------
 This plugin also provides a way to jump to the actual error. Since errors can
 be living in a file other than your test (e.g. a syntax error in your source
 that triggers an assertion errro in the current file) you can also jump to that
@@ -96,6 +100,8 @@ the error was reported.
 If an error starts in the current file but ends on a different one, you can
 call that ``end of error`` by calling ``:Pytest end``.
 
+Output
+------
 Finally, you can also display in a split scratch buffer either the last list
 of failed tests (with line numbers, errors and paths) or the last ``py.test``
 session (similar to what you would see in a terminal). The arguments that 
@@ -120,6 +126,35 @@ when you decide -  while you work on fixing errors.
 
 The commands that open the last session and the last fails are toggable: they
 will close the scratch buffer if it is open or will open it if its closed.
+
+PDB
+---
+If you have ever needed to get into a `pdb` session and debug your code, you 
+already know that it is a horrible experience to be jumping between Vim and
+the terminal. **pytest.vim** now includes a way of calling it with 2 options
+that will let you drop to a shell (inside Vim!) and control your pdb session.
+
+**py.test pdb**
+Use this option when you need to use the built-in pdb support from py.test 
+(e.g. drop to pdb when a test fails).
+
+::
+
+    :Pytest class pdb
+
+The above command shows `class` but you can use this with all the objects
+supported (`class`, `method` and `file`).
+
+
+**py.test no-capture**
+If you are placing `import pdb; pdb.set_trace()` somewhere in your code and 
+you want to drop to pdb when that code gets executed, then you need to pass
+in the no-capture flag::
+
+    :Pytest class no-capture
+
+Again the above command shows `class` but you can use this with all the objects
+supported (`class`, `method` and `file`).
 
 
 License
