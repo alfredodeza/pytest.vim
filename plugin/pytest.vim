@@ -526,7 +526,7 @@ function! s:GreenBar()
 endfunction
 
 
-function! s:ThisMethod(verbose)
+function! s:ThisMethod(verbose, ...)
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
@@ -542,6 +542,10 @@ function! s:ThisMethod(verbose)
     let message = "py.test ==> Running test for method " . m_name 
     call s:Echo(message, 1)
 
+    if (a:0 > 0)
+        call s:Pdb(path, a:1)
+        return
+    endif
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
@@ -550,7 +554,7 @@ function! s:ThisMethod(verbose)
 endfunction
 
 
-function! s:ThisClass(verbose)
+function! s:ThisClass(verbose, ...)
     let c_name      = s:NameOfCurrentClass()
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
@@ -561,6 +565,10 @@ function! s:ThisClass(verbose)
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
+    if (a:0 > 0)
+        call s:Pdb(path, a:1)
+        return
+    endif
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
@@ -569,9 +577,28 @@ function! s:ThisClass(verbose)
 endfunction
 
 
-function! s:ThisFile(verbose)
+function! s:Pdb(path, ...)
+    if (a:0 > 0)
+        if (a:1 == 'no-capture')
+            let flag = '-s '
+        elseif (a:1 == 'pdb')
+            let flag = '--pdb '
+        endif
+    endif
+    let pdb_command = "py.test " . flag . a:path
+    exe ":!" . pdb_command
+endfunction
+
+
+function! s:ThisFile(verbose, ...)
     call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
+
+    if (a:0 > 0)
+        call s:Pdb(abspath, a:1)
+        return
+    endif
+
     if (a:verbose == 1)
         call s:RunInSplitWindow(abspath)
     else
@@ -591,25 +618,32 @@ function! s:Completion(ArgLead, CmdLine, CursorPos)
     let optional     = "verbose\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
-    return test_objects . result_order . reports . optional . pyversion
+    let pdb          = "pdb\nno-capture\n"
+    return test_objects . result_order . reports . optional . pyversion . pdb
 endfunction
 
 
 function! s:Proxy(action, ...)
-    if (a:0 == 1)
-        let verbose = 1
-    else
-        let verbose = 0
+    " Some defaults
+    let verbose = 0
+    let pdb     = 0
+
+    if (a:0 > 0)
+        if (a:1 == 'verbose')
+            let verbose = 1
+        elseif (a:1 == 'pdb')
+            let pdb = 'pdb'
+        endif
     endif
     if (a:action == "class")
         call s:ClearAll()
-        call s:ThisClass(verbose)
+        call s:ThisClass(verbose, pdb)
     elseif (a:action == "method")
         call s:ClearAll()
-        call s:ThisMethod(verbose)
+        call s:ThisMethod(verbose, pdb)
     elseif (a:action == "file")
         call s:ClearAll()
-        call s:ThisFile(verbose)
+        call s:ThisFile(verbose, pdb)
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
     elseif (a:action == "next")
