@@ -527,11 +527,6 @@ endfunction
 
 
 function! s:ThisMethod(verbose, ...)
-"    if (a:1 == 'pdb') 
-"        call s:Echo("got pdb man")
-"        "call s:Echo(a:1)
-"    endif
-"    return
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
