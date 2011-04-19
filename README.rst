@@ -134,24 +134,24 @@ already know that it is a horrible experience to be jumping between Vim and
 the terminal. **pytest.vim** now includes a way of calling it with 2 options
 that will let you drop to a shell (inside Vim!) and control your pdb session.
 
-**py.test pdb**
+**py.test pdb on fail**
 Use this option when you need to use the built-in pdb support from py.test 
 (e.g. drop to pdb when a test fails).
 
 ::
 
-    :Pytest class pdb
+    :Pytest class --pdb
 
 The above command shows `class` but you can use this with all the objects
 supported (`class`, `method` and `file`).
 
 
-**py.test no-capture**
+**py.test no capture**
 If you are placing `import pdb; pdb.set_trace()` somewhere in your code and 
 you want to drop to pdb when that code gets executed, then you need to pass
 in the no-capture flag::
 
-    :Pytest class no-capture
+    :Pytest class -s
 
 Again the above command shows `class` but you can use this with all the objects
 supported (`class`, `method` and `file`).
