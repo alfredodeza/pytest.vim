@@ -527,6 +527,11 @@ endfunction
 
 
 function! s:ThisMethod(verbose, ...)
+"    if (a:1 == 'pdb') 
+"        call s:Echo("got pdb man")
+"        "call s:Echo(a:1)
+"    endif
+"    return
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
@@ -542,7 +547,7 @@ function! s:ThisMethod(verbose, ...)
     let message = "py.test ==> Running test for method " . m_name 
     call s:Echo(message, 1)
 
-    if (a:0 > 0)
+    if ((a:1 == 'pdb') || (a:1 == 'no-capture'))
         call s:Pdb(path, a:1)
         return
     endif
@@ -565,10 +570,12 @@ function! s:ThisClass(verbose, ...)
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
-    if (a:0 > 0)
+
+    if ((a:1 == 'pdb') || (a:1 == 'no-capture'))
         call s:Pdb(path, a:1)
         return
     endif
+
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
@@ -594,7 +601,7 @@ function! s:ThisFile(verbose, ...)
     call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
 
-    if (a:0 > 0)
+    if ((a:1 == 'pdb') || (a:1 == 'no-capture'))
         call s:Pdb(abspath, a:1)
         return
     endif
@@ -618,7 +625,7 @@ function! s:Completion(ArgLead, CmdLine, CursorPos)
     let optional     = "verbose\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
-    let pdb          = "pdb\nno-capture\n"
+    let pdb          = "--pdb\n-s\n"
     return test_objects . result_order . reports . optional . pyversion . pdb
 endfunction
 
@@ -631,19 +638,21 @@ function! s:Proxy(action, ...)
     if (a:0 > 0)
         if (a:1 == 'verbose')
             let verbose = 1
-        elseif (a:1 == 'pdb')
+        elseif (a:1 == '--pdb')
             let pdb = 'pdb'
+        elseif (a:1 == '-s')
+            let pdb = 'no-capture'
         endif
     endif
     if (a:action == "class")
         call s:ClearAll()
-        call s:ThisClass(verbose, pdb)
+        call s:ThisClass(verbose, a:1)
     elseif (a:action == "method")
         call s:ClearAll()
-        call s:ThisMethod(verbose, pdb)
+        call s:ThisMethod(verbose, a:1)
     elseif (a:action == "file")
         call s:ClearAll()
-        call s:ThisFile(verbose, pdb)
+        call s:ThisFile(verbose, a:1)
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
     elseif (a:action == "next")
