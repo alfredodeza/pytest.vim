@@ -598,7 +598,11 @@ endfunction
 
 function! s:Pdb(path, ...)
     let pdb_command = "py.test " . a:1 . " " . a:path
-    exe ":!" . pdb_command
+    if exists("g:ConqueTerm_Loaded") 
+        call conque_term#open(pdb_command, ['split', 'resize 20'], 0)
+    else
+        exe ":!" . pdb_command
+    endif
 endfunction
 
 
