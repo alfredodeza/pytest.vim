@@ -55,7 +55,7 @@ something like this::
 
     Running tests for class TestMyClass
 
-If you would like to see the complete py.test output you can add an optional "verbose"
+If you would like to see the complete py.test output you can add an optional `verbose`
 flag to any of the commands for Pytest. For the previous command, it would
 look like::
 
@@ -157,6 +157,13 @@ in the no-capture flag::
 
 Again the above command shows `class` but you can use this with all the objects
 supported (`class`, `method` and `file`).
+
+Shell Support
+-------------
+This plugin provides a way to have a better shell experience when running
+`verbose` or `pdb` flags by using the `Conque.vim` plugin. If you have this
+most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?script_id=2771)
+then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 
 
 License
