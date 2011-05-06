@@ -199,14 +199,18 @@ endfunction
 
 function! s:RunInSplitWindow(path)
     let cmd = "py.test --tb=short " . a:path
-	let command = join(map(split(cmd), 'expand(v:val)'))
-	let winnr = bufwinnr('PytestVerbose.pytest')
-	silent! execute  winnr < 0 ? 'botright new ' . 'PytestVerbose.pytest' : winnr . 'wincmd w'
-	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
-	silent! execute 'silent %!'. command
-	silent! execute 'resize ' . line('$')
-    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
-    call s:PytestSyntax()
+    if exists("g:ConqueTerm_Loaded") 
+        call conque_term#open(cmd, ['split', 'resize 20'], 0)
+    else
+        let command = join(map(split(cmd), 'expand(v:val)'))
+        let winnr = bufwinnr('PytestVerbose.pytest')
+        silent! execute  winnr < 0 ? 'botright new ' . 'PytestVerbose.pytest' : winnr . 'wincmd w'
+        setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
+        silent! execute 'silent %!'. command
+        silent! execute 'resize ' . line('$')
+        silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+        call s:PytestSyntax()
+    endif
 endfunction
 
 
