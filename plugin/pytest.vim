@@ -353,9 +353,9 @@ endfunction
 function! s:ClearAll()
     let bufferL = [ 'Fails.pytest', 'LastSession.pytest', 'ShowError.pytest', 'PytestVerbose.pytest' ]
     for b in bufferL
-        let winnr = bufwinnr(b)
-        if (winnr != -1)
-            silent! execute winnr . 'wincmd p'
+        let _window = bufwinnr(b)
+        if (_window != -1)
+            silent! execute _window . 'wincmd w'
             silent! execute 'q'
         endif
     endfor
