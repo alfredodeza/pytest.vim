@@ -58,6 +58,33 @@ function! s:PytestFailsSyntax() abort
   hi def link PytestQEnds               String
 endfunction
 
+function! s:GoToInlineError(number)
+
+    "  Goes to the current open window that matches
+    "  the error path and moves you there. Pretty awesome
+    
+    if (len(g:pytest_session_errors) > 0)
+        let select_error = g:pytest_session_errors[g:pytest_session_error]
+        let line_number  = select_error['file_line']
+        let error_path   = select_error['file_path']
+        let exception    = select_error['exception']
+        let file_name    = expand("%:t")
+
+        if error_path =~ file_name
+            execute line_number
+        else
+            call s:OpenError(error_path)
+            execute line_number
+        endif
+
+        let message = "End of Failed test: " . g:pytest_session_error . "\t ==>> " . exception
+        call s:Echo(message, 1)
+        return
+    else
+        call s:Echo("Failed test list is empty")
+    endif
+endfunction
+
 
 function! s:GoToError(direction)
     "   0 goes to first
@@ -369,8 +396,8 @@ function! s:RunPyTest(path)
     
     " Pointers and default variables
     let g:pytest_session_errors = {}
-    let g:pytest_session_error = 0
-    let g:pytest_last_session = out
+    let g:pytest_session_error  = 0
+    let g:pytest_last_session   = out
     " Loop through the output and build the error dict
 
     for w in split(out, '\n')
