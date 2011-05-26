@@ -58,33 +58,56 @@ function! s:PytestFailsSyntax() abort
   hi def link PytestQEnds               String
 endfunction
 
-function! s:GoToInlineError(number)
+function! s:GoToInlineError(direction)
+    let orig_line = line('.')
+    let last_line = line('$')
+
+    " Move to the line we need
+    let move_to = orig_line + a:direction
+
+    if move_to <= 1 || move_to > last_line
+        let move_to = 1
+        exe move_to
+    else
+        exe move_to
+    endif
+
+    if move_to == 1
+        let _num = move_to
+    else
+        let _num = move_to - 1
+    endif
 
     "  Goes to the current open window that matches
     "  the error path and moves you there. Pretty awesome
-    
+    let open_windows = winnr('$')
+    let open_buffers = bufnr('$') "XXX Do we need this?
+    let valid_buffers = {}
+
     if (len(g:pytest_session_errors) > 0)
-        let select_error = g:pytest_session_errors[g:pytest_session_error]
+        let select_error = g:pytest_session_errors[_num]
         let line_number  = select_error['file_line']
         let error_path   = select_error['file_path']
         let exception    = select_error['exception']
-        let file_name    = expand("%:t")
 
+        " Go to previous window
+        exe 'wincmd p'
+        let file_name    = expand("%:t")
         if error_path =~ file_name
             execute line_number
-        else
-            call s:OpenError(error_path)
-            execute line_number
+            execute 'normal zz'
+            exe 'wincmd p'
+            let orig_line = _num+1
+            exe orig_line
+            let message = "Failed test: " . _num . "\t ==>> " . exception
+            call s:Echo(message, 1)
+            return
         endif
 
-        let message = "End of Failed test: " . g:pytest_session_error . "\t ==>> " . exception
-        call s:Echo(message, 1)
-        return
     else
         call s:Echo("Failed test list is empty")
     endif
 endfunction
-
 
 function! s:GoToError(direction)
     "   0 goes to first
@@ -314,8 +337,14 @@ function! s:ShowFails(...)
         call setline(error_number, message)    
     endfor
 	silent! execute 'resize ' . line('$')
-    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
-    silent! execute 'nnoremap <silent> <buffer> <Enter> :q! <CR>'
+    nnoremap <silent> <buffer> q :q! <CR>
+    nnoremap <silent> <buffer> <Enter> :q! <CR>
+    nnoremap <script> <buffer> <C-n>  :call <sid>GoToInlineError(1)<CR>
+    nnoremap <script> <buffer> <down> :call <sid>GoToInlineError(1)<CR>
+    nnoremap <script> <buffer> j      :call <sid>GoToInlineError(1)<CR>
+    nnoremap <script> <buffer> <C-p>  :call <sid>GoToInlineError(-1)<CR>
+    nnoremap <script> <buffer> <up>   :call <sid>GoToInlineError(-1)<CR>
+    nnoremap <script> <buffer> k      :call <sid>GoToInlineError(-1)<CR>
     call s:PytestFailsSyntax()
     exe "normal 0|h"
     if (! gain_focus)
