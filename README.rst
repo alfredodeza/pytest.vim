@@ -165,6 +165,31 @@ This plugin provides a way to have a better shell experience when running
 most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?script_id=2771)
 then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 
+Development Release
+===================
+If you are checking out this plugin from the Git repository instead of an
+official release from vim.org then these are things you need to know the new 
+things/implementations are considered *alpha* (they WILL break!)
+
+This is currently in the dev version and not in the official release:
+
+`looponfail` 
+---------------
+This is an *extra* option that will allow you to loop on a single method. If
+the test fails, then this option will make Vim run the same test again as 
+soon as the file is written.
+
+Once the test passes, the option gets overridden. Currently available for
+method tests only. You would call it like so::
+
+    :Pytest method looponfail
+
+Fast Next/Previous Error
+------------------------
+Now when the Failed Error list is open and it as focus (cursor is currently in
+that window) you can move to the next or previous failed test line by using the
+arrow keys or `Ctrl-n` / `Ctrl-p`
+
 
 License
 -------
