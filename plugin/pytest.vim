@@ -15,6 +15,7 @@ endif
 let g:pytest_session_errors    = {}
 let g:pytest_session_error     = 0
 let g:pytest_last_session      = ""
+let g:pytest_looponfail        = 0
 
 
 function! s:PytestSyntax() abort
@@ -57,6 +58,18 @@ function! s:PytestFailsSyntax() abort
   hi def link PytestQPath               String
   hi def link PytestQEnds               String
 endfunction
+
+
+function! s:LoopOnFail()
+
+    if g:pytest_looponfail == 1
+        autocmd! BufWritePost *.py call s:ThisMethod(0, 'False')
+    else
+        au! 
+    endif
+
+endfunction
+
 
 function! s:GoToInlineError(direction)
     let orig_line = line('.')
@@ -337,14 +350,14 @@ function! s:ShowFails(...)
         call setline(error_number, message)    
     endfor
 	silent! execute 'resize ' . line('$')
-    nnoremap <silent> <buffer> q :q! <CR>
+    nnoremap <silent> <buffer> q       :q! <CR>
     nnoremap <silent> <buffer> <Enter> :q! <CR>
-    nnoremap <script> <buffer> <C-n>  :call <sid>GoToInlineError(1)<CR>
-    nnoremap <script> <buffer> <down> :call <sid>GoToInlineError(1)<CR>
-    nnoremap <script> <buffer> j      :call <sid>GoToInlineError(1)<CR>
-    nnoremap <script> <buffer> <C-p>  :call <sid>GoToInlineError(-1)<CR>
-    nnoremap <script> <buffer> <up>   :call <sid>GoToInlineError(-1)<CR>
-    nnoremap <script> <buffer> k      :call <sid>GoToInlineError(-1)<CR>
+    nnoremap <script> <buffer> <C-n>   :call <sid>GoToInlineError(1)<CR>
+    nnoremap <script> <buffer> <down>  :call <sid>GoToInlineError(1)<CR>
+    nnoremap <script> <buffer> j       :call <sid>GoToInlineError(1)<CR>
+    nnoremap <script> <buffer> <C-p>   :call <sid>GoToInlineError(-1)<CR>
+    nnoremap <script> <buffer> <up>    :call <sid>GoToInlineError(-1)<CR>
+    nnoremap <script> <buffer> k       :call <sid>GoToInlineError(-1)<CR>
     call s:PytestFailsSyntax()
     exe "normal 0|h"
     if (! gain_focus)
@@ -378,7 +391,7 @@ function! s:ToggleFailWindow()
     if (winnr == -1)
         call s:ShowFails()
     else
-        silent! execute winnr . 'wincmd p'
+        silent! execute winnr . 'wincmd w'
         silent! execute 'q'
     endif
 endfunction
@@ -389,7 +402,7 @@ function! s:ToggleLastSession()
     if (winnr == -1)
         call s:LastSession()
     else
-        silent! execute winnr . 'wincmd p'
+        silent! execute winnr . 'wincmd w'
         silent! execute 'q'
     endif
 endfunction
@@ -400,7 +413,7 @@ function! s:ToggleShowError()
     if (winnr == -1)
         call s:ShowError()
     else
-        silent! execute winnr . 'wincmd p'
+        silent! execute winnr . 'wincmd w'
         silent! execute 'q'
     endif
 endfunction
@@ -427,7 +440,6 @@ function! s:RunPyTest(path)
     let g:pytest_session_errors = {}
     let g:pytest_session_error  = 0
     let g:pytest_last_session   = out
-    " Loop through the output and build the error dict
 
     for w in split(out, '\n')
         if w =~ '\v\s+(FAILURES)\s+'
@@ -443,6 +455,11 @@ function! s:RunPyTest(path)
         endif
     endfor
     call s:GreenBar()
+
+    " If looponfail is set we no longer need it
+    " So clear the autocomand and set the global var to 0
+    let g:pytest_looponfail = 0
+    call s:LoopOnFail()
 endfunction
 
 
@@ -609,7 +626,7 @@ function! s:ThisMethod(verbose, ...)
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
-        call s:RunPyTest(path)
+       call s:RunPyTest(path)
     endif
 endfunction
 
@@ -667,14 +684,14 @@ endfunction
 
 
 function! s:Version()
-    call s:Echo("pytest.vim version 0.6.0", 1)
+    call s:Echo("pytest.vim version 0.7.0dev", 1)
 endfunction
 
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
     let result_order = "first\nlast\nnext\nprevious\n"
     let test_objects = "class\nmethod\nfile\n"
-    let optional     = "verbose\n"
+    let optional     = "verbose\nlooponfail\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
     let pdb          = "--pdb\n-s\n"
@@ -686,6 +703,7 @@ function! s:Proxy(action, ...)
     " Some defaults
     let verbose = 0
     let pdb     = 'False'
+    let looponfail = 0
 
     if (a:0 > 0)
         if (a:1 == 'verbose')
@@ -694,14 +712,22 @@ function! s:Proxy(action, ...)
             let pdb = '--pdb'
         elseif (a:1 == '-s')
             let pdb = '-s'
+        elseif (a:1 == 'looponfail')
+            let g:pytest_looponfail = 1
+            let looponfail = 1
         endif
     endif
     if (a:action == "class")
         call s:ClearAll()
         call s:ThisClass(verbose, pdb)
     elseif (a:action == "method")
-        call s:ClearAll()
-        call s:ThisMethod(verbose, pdb)
+        if looponfail == 1
+            call s:LoopOnFail()
+            call s:ThisMethod(verbose, pdb)
+        else
+            call s:ClearAll()
+            call s:ThisMethod(verbose, pdb)
+        endif
     elseif (a:action == "file")
         call s:ClearAll()
         call s:ThisFile(verbose, pdb)
