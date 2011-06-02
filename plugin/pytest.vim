@@ -319,8 +319,6 @@ endfunction
 
 
 function! s:ShowFails(...)
-    set verbose=15 nomore
-    exe "redir! > ~/vimlog.txt"
     call s:ClearAll()
     au BufLeave *.pytest echo "" | redraw
     if a:0 > 0
