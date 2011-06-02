@@ -385,8 +385,6 @@ function! s:ShowFails(...)
         exe 'wincmd p'
     else
         call s:Echo("Hit Return or q to exit", 1)
-        exe 'wincmd w'
-        startinsert
     endif
 endfunction
 
@@ -660,6 +658,32 @@ function! s:ThisMethod(verbose, ...)
 endfunction
 
 
+function! s:ThisFunction(verbose, ...)
+    call s:ClearAll()
+    let c_name      = s:NameOfCurrentFunction()
+    let abspath     = s:CurrentPath()
+    if (strlen(c_name) == 1)
+        call s:Echo("Unable to find a matching function for testing")
+        return
+    endif
+    let message  = "py.test ==> Running tests for function " . c_name 
+    call s:Echo(message, 1)
+
+    let path = abspath . "::" . c_name
+
+    if ((a:1 == '--pdb') || (a:1 == '-s'))
+        call s:Pdb(path, a:1)
+        return
+    endif
+
+    if (a:verbose == 1)
+        call s:RunInSplitWindow(path)
+    else
+        call s:RunPyTest(path)
+    endif
+endfunction
+
+
 function! s:ThisClass(verbose, ...)
     call s:ClearAll()
     let c_name      = s:NameOfCurrentClass()
@@ -761,6 +785,13 @@ function! s:Proxy(action, ...)
             call s:ThisMethod(verbose, pdb)
         else
             call s:ThisMethod(verbose, pdb)
+        endif
+    elseif (a:action == "function")
+        if looponfail == 1
+            call s:LoopOnFail(a:action)
+            call s:ThisFunction(verbose, pdb)
+        else
+            call s:ThisFunction(verbose, pdb)
         endif
     elseif (a:action == "file")
         if looponfail == 1
