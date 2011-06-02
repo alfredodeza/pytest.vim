@@ -60,10 +60,16 @@ function! s:PytestFailsSyntax() abort
 endfunction
 
 
-function! s:LoopOnFail()
+function! s:LoopOnFail(type)
 
     if g:pytest_looponfail == 1
-        autocmd! BufWritePost *.py call s:ThisMethod(0, 'False')
+        if a:type == 'method'
+            autocmd! BufWritePost *.py call s:ThisMethod(0, 'False')
+        elseif a:type == 'class'
+            autocmd! BufWritePost *.py call s:ThisClass(0, 'False')
+        elseif a:type == 'file'
+            autocmd! BufWritePost *.py call s:ThisFile(0, 'False')
+        endif
     else
         au! 
     endif
@@ -254,6 +260,19 @@ function! s:NameOfCurrentMethod()
 endfunction
 
 
+function! s:NameOfCurrentFunction()
+    let save_cursor = getpos(".")
+    normal $<cr>
+    let find_object = s:FindPythonObject('function')
+    if (find_object)
+        let line = getline('.')
+        call setpos('.', save_cursor)
+        let match_result = matchlist(line, ' *def \+\(\w\+\)')
+        return match_result[1]
+    endif
+endfunction
+
+
 function! s:CurrentPath()
     let cwd = expand("%:p")
     return cwd
@@ -366,6 +385,8 @@ function! s:ShowFails(...)
         exe 'wincmd p'
     else
         call s:Echo("Hit Return or q to exit", 1)
+        exe 'wincmd w'
+        startinsert
     endif
 endfunction
 
@@ -466,7 +487,7 @@ function! s:RunPyTest(path)
     " If looponfail is set we no longer need it
     " So clear the autocomand and set the global var to 0
     let g:pytest_looponfail = 0
-    call s:LoopOnFail()
+    call s:LoopOnFail(0)
 endfunction
 
 
@@ -640,6 +661,7 @@ endfunction
 
 
 function! s:ThisClass(verbose, ...)
+    call s:ClearAll()
     let c_name      = s:NameOfCurrentClass()
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
@@ -665,6 +687,7 @@ endfunction
 
 
 function! s:ThisFile(verbose, ...)
+    call s:ClearAll()
     call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
 
@@ -726,19 +749,26 @@ function! s:Proxy(action, ...)
         endif
     endif
     if (a:action == "class")
-        call s:ClearAll()
-        call s:ThisClass(verbose, pdb)
+        if looponfail == 1
+            call s:LoopOnFail(a:action)
+            call s:ThisClass(verbose, pdb)
+        else
+            call s:ThisClass(verbose, pdb)
+        endif
     elseif (a:action == "method")
         if looponfail == 1
-            call s:LoopOnFail()
+            call s:LoopOnFail(a:action)
             call s:ThisMethod(verbose, pdb)
         else
-            call s:ClearAll()
             call s:ThisMethod(verbose, pdb)
         endif
     elseif (a:action == "file")
-        call s:ClearAll()
-        call s:ThisFile(verbose, pdb)
+        if looponfail == 1
+            call s:LoopOnFail(a:action)
+            call s:ThisFile(verbose, pdb)
+        else
+            call s:ThisFile(verbose, pdb)
+        endif
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
     elseif (a:action == "next")
