@@ -287,6 +287,7 @@ endfunction
 
 
 function! s:ShowError()
+    call s:ClearAll()
     if (len(g:pytest_session_errors) == 0)
         call s:Echo("No Failed test error from a previous run")
         return
@@ -318,6 +319,9 @@ endfunction
 
 
 function! s:ShowFails(...)
+    set verbose=15 nomore
+    exe "redir! > ~/vimlog.txt"
+    call s:ClearAll()
     au BufLeave *.pytest echo "" | redraw
     if a:0 > 0
         let gain_focus = a:0
@@ -358,17 +362,19 @@ function! s:ShowFails(...)
     nnoremap <script> <buffer> <C-p>   :call <sid>GoToInlineError(-1)<CR>
     nnoremap <script> <buffer> <up>    :call <sid>GoToInlineError(-1)<CR>
     nnoremap <script> <buffer> k       :call <sid>GoToInlineError(-1)<CR>
-    call s:PytestFailsSyntax()
-    exe "normal 0|h"
-    if (! gain_focus)
-        exe 'wincmd p'
-    else
-        call s:Echo("Hit Return or q to exit", 1)
-    endif
+    echo "here"
+"    call s:PytestFailsSyntax()
+"    exe "normal 0|h"
+"    if (! gain_focus)
+"        exe 'wincmd p'
+"    else
+"        call s:Echo("Hit Return or q to exit", 1)
+"    endif
 endfunction
 
 
 function! s:LastSession()
+    call s:ClearAll()
     if (len(g:pytest_last_session) == 0)
         call s:Echo("There is currently no saved last session to display")
         return
@@ -449,6 +455,10 @@ function! s:RunPyTest(path)
             call s:ParseErrors(out)
             return
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
+            call s:RedBar()
+            echo "py.test " . w
+            return
+        elseif w =~ '\v^(.*)\s*INTERNALERROR'
             call s:RedBar()
             echo "py.test " . w
             return
@@ -604,6 +614,7 @@ endfunction
 
 
 function! s:ThisMethod(verbose, ...)
+    call s:ClearAll()
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
@@ -749,6 +760,8 @@ function! s:Proxy(action, ...)
         call s:ToggleShowError()
     elseif (a:action == "version")
         call s:Version()
+    else
+        call s:Echo("Not a valid Pytest option ==> " . a:action)
     endif
 endfunction
 
