@@ -360,14 +360,13 @@ function! s:ShowFails(...)
     nnoremap <script> <buffer> <C-p>   :call <sid>GoToInlineError(-1)<CR>
     nnoremap <script> <buffer> <up>    :call <sid>GoToInlineError(-1)<CR>
     nnoremap <script> <buffer> k       :call <sid>GoToInlineError(-1)<CR>
-    echo "here"
-"    call s:PytestFailsSyntax()
-"    exe "normal 0|h"
-"    if (! gain_focus)
-"        exe 'wincmd p'
-"    else
-"        call s:Echo("Hit Return or q to exit", 1)
-"    endif
+    call s:PytestFailsSyntax()
+    exe "normal 0|h"
+    if (! gain_focus)
+        exe 'wincmd p'
+    else
+        call s:Echo("Hit Return or q to exit", 1)
+    endif
 endfunction
 
 
