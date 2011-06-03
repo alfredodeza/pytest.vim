@@ -90,8 +90,7 @@ function! s:GoToInlineError(direction)
     if move_to > last_line
         let move_to = 1
         exe move_to
-    elseif move_to == 1
-        echo "move_to is one"
+    elseif move_to <= 1 
         let move_to = last_line
         exe move_to
     else
@@ -106,7 +105,6 @@ function! s:GoToInlineError(direction)
 
     "  Goes to the current open window that matches
     "  the error path and moves you there. Pretty awesome
-
     if (len(g:pytest_session_errors) > 0)
         let select_error = g:pytest_session_errors[_num]
         let line_number  = select_error['file_line']
