@@ -1,5 +1,5 @@
 " File:        pytest.vim
-" Description: Runs the current test Class/Method/Function with
+" Description: Runs the current test Class/Method/Function/File with
 "              py.test 
 " Maintainer:  Alfredo Deza <alfredodeza AT gmail.com>
 " License:     MIT
@@ -478,7 +478,7 @@ function! s:RunPyTest(path)
             return
         elseif w =~ '\v^(.*)\s*INTERNALERROR'
             call s:RedBar()
-            echo "py.test " . w
+            echo "py.test had an InternalError, see :Pytest session for more information" 
             return
         endif
     endfor
