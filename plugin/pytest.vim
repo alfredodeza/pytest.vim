@@ -123,6 +123,10 @@ function! s:GoToInlineError(direction)
             let message = "Failed test: " . _num . "\t ==>> " . exception
             call s:Echo(message, 1)
             return
+        else " we might have an error on another file
+            let message = "Failed test on different buffer. Skipping..."
+            call s:Echo(message, 1)
+            exe 'wincmd p'
         endif
 
     else
