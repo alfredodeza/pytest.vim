@@ -86,7 +86,6 @@ function! s:GoToInlineError(direction)
     " Move to the line we need
     let move_to = orig_line + a:direction
 
-    "if move_to <= 1 || move_to > last_line
     if move_to > last_line
         let move_to = 1
         exe move_to
