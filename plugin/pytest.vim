@@ -67,6 +67,8 @@ function! s:LoopOnFail(type)
             autocmd! BufWritePost *.py call s:ThisMethod(0, 'False')
         elseif a:type == 'class'
             autocmd! BufWritePost *.py call s:ThisClass(0, 'False')
+        elseif a:type == 'function'
+            autocmd! BufWritePost *.py call s:ThisFunction(0, 'False')
         elseif a:type == 'file'
             autocmd! BufWritePost *.py call s:ThisFile(0, 'False')
         endif
