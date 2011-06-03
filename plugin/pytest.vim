@@ -86,8 +86,13 @@ function! s:GoToInlineError(direction)
     " Move to the line we need
     let move_to = orig_line + a:direction
 
-    if move_to <= 1 || move_to > last_line
+    "if move_to <= 1 || move_to > last_line
+    if move_to > last_line
         let move_to = 1
+        exe move_to
+    elseif move_to == 1
+        echo "move_to is one"
+        let move_to = last_line
         exe move_to
     else
         exe move_to
@@ -101,9 +106,6 @@ function! s:GoToInlineError(direction)
 
     "  Goes to the current open window that matches
     "  the error path and moves you there. Pretty awesome
-    let open_windows = winnr('$')
-    let open_buffers = bufnr('$') "XXX Do we need this?
-    let valid_buffers = {}
 
     if (len(g:pytest_session_errors) > 0)
         let select_error = g:pytest_session_errors[_num]
