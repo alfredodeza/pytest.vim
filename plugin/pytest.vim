@@ -474,7 +474,7 @@ function! s:RunPyTest(path)
             return
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
             call s:RedBar()
-            echo "py.test " . w
+            echo "py.test had an Error, see :Pytest session for more information" 
             return
         elseif w =~ '\v^(.*)\s*INTERNALERROR'
             call s:RedBar()
