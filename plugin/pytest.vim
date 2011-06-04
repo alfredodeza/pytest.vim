@@ -64,18 +64,36 @@ function! s:LoopOnFail(type)
 
     if g:pytest_looponfail == 1
         if a:type == 'method'
-            autocmd! BufWritePost *.py call s:ThisMethod(0, 'False')
+            autocmd! BufWritePost *.py call s:LoopProxy('method')
         elseif a:type == 'class'
-            autocmd! BufWritePost *.py call s:ThisClass(0, 'False')
+            autocmd! BufWritePost *.py call s:LoopProxy('class')
         elseif a:type == 'function'
-            autocmd! BufWritePost *.py call s:ThisFunction(0, 'False')
+            autocmd! BufWritePost *.py call s:LoopProxy('function')
         elseif a:type == 'file'
-            autocmd! BufWritePost *.py call s:ThisFile(0, 'False')
+            autocmd! BufWritePost *.py call s:LoopProxy('file')
         endif
     else
         au! 
     endif
 
+endfunction
+
+
+function! s:LoopProxy(type)
+    " Very repetitive function, but allows specific function
+    " calling when autocmd is executed
+    if a:type == 'method'
+        call s:ThisMethod(0, 'False')
+    elseif a:type == 'class'
+        call s:ThisClass(0, 'False')
+    elseif a:type == 'function'
+        call s:ThisFunction(0, 'False')
+    elseif a:type == 'file'
+        call s:ThisFile(0, 'False')
+    endif
+
+    " Go to the very bottom window
+    call feedkeys("\<C-w>b", 'n')
 endfunction
 
 
