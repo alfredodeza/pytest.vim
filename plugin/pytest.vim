@@ -473,7 +473,17 @@ function! s:ClearAll()
             silent! execute 'q'
         endif
     endfor
+
 endfunction
+
+
+function! s:ResetAll()
+    " Resets all global vars
+    let g:pytest_session_errors    = {}
+    let g:pytest_session_error     = 0
+    let g:pytest_last_session      = ""
+    let g:pytest_looponfail        = 0
+endfunction!
 
 
 function! s:RunPyTest(path)
@@ -769,7 +779,7 @@ endfunction
 function! s:Completion(ArgLead, CmdLine, CursorPos)
     let result_order = "first\nlast\nnext\nprevious\n"
     let test_objects = "class\nmethod\nfile\n"
-    let optional     = "verbose\nlooponfail\n"
+    let optional     = "verbose\nlooponfail\nclear\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
     let pdb          = "--pdb\n-s\n"
@@ -839,6 +849,9 @@ function! s:Proxy(action, ...)
         call s:ToggleLastSession()
     elseif (a:action == "error")
         call s:ToggleShowError()
+    elseif (a:action == "clear")
+        call s:ClearAll()
+        call s:ResetAll()
     elseif (a:action == "version")
         call s:Version()
     else
