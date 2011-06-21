@@ -82,18 +82,22 @@ endfunction
 function! s:LoopProxy(type)
     " Very repetitive function, but allows specific function
     " calling when autocmd is executed
-    if a:type == 'method'
-        call s:ThisMethod(0, 'False')
-    elseif a:type == 'class'
-        call s:ThisClass(0, 'False')
-    elseif a:type == 'function'
-        call s:ThisFunction(0, 'False')
-    elseif a:type == 'file'
-        call s:ThisFile(0, 'False')
-    endif
+    if g:pytest_looponfail == 1
+        if a:type == 'method'
+            call s:ThisMethod(0, 'False')
+        elseif a:type == 'class'
+            call s:ThisClass(0, 'False')
+        elseif a:type == 'function'
+            call s:ThisFunction(0, 'False')
+        elseif a:type == 'file'
+            call s:ThisFile(0, 'False')
+        endif
 
-    " Go to the very bottom window
-    call feedkeys("\<C-w>b", 'n')
+        " Go to the very bottom window
+        call feedkeys("\<C-w>b", 'n')
+    else
+        au! 
+    endif
 endfunction
 
 
