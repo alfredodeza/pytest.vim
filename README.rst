@@ -186,6 +186,17 @@ You would call it like::
 
     :Pytest method looponfail
 
+`clear`
+-------
+If for some reason you need to reset and clear all global variables that affect
+the plugin you can do so by running the following command::
+
+    :Pytest clear
+
+This is specifically useful when `looponfail` has been enabled and you want to
+stop its automatic behavior. Remember that `looponfail` will run every time you 
+write the buffer and will keep doing so unless your test passes.
+
 Fast Next/Previous Error
 ------------------------
 Now when the Failed Error list is open and it as focus (cursor is currently in
