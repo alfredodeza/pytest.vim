@@ -166,14 +166,6 @@ This plugin provides a way to have a better shell experience when running
 most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?script_id=2771)
 then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 
-Development Release
-===================
-If you are checking out this plugin from the Git repository instead of an
-official release from vim.org then these are things you need to know the new 
-things/implementations are considered *alpha* (they WILL break!)
-
-This is currently in the dev version and not in the official release:
-
 `looponfail` 
 ---------------
 This is an *extra* option that will allow you to loop (run again) on fail.
@@ -207,6 +199,16 @@ Whenever you hit the bottom or the top of the list, you can loop around it!
 
 If you hit an error that displays not the previous window (e.g. your test file)
 then a message will state that it is skipping.
+
+
+Development Release
+===================
+If you are checking out this plugin from the Git repository instead of an
+official release from vim.org then you need to know that some
+things/implementations are considered *alpha* (they WILL break!). I usually
+list them here, so please take note before using them.
+
+The current development version does not have any un-released features.
 
 
 License
