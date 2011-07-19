@@ -35,6 +35,7 @@ These arguments are::
 
     class
     method
+    function
     file
 
 
@@ -94,6 +95,15 @@ the error was reported.
 If an error starts in the current file but ends on a different one, you can
 call that ``end of error`` by calling ``:Pytest end``.
 
+Now when the Failed Error list is open and it as focus (cursor is currently in
+that window) you can move to the next or previous failed test line by using the
+arrow keys, `j`/`k`  or `Ctrl-n` / `Ctrl-p`
+
+Whenever you hit the bottom or the top of the list, you can loop around it!
+
+If you hit an error that displays not the previous window (e.g. your test file)
+then a message will state that it is skipping.
+
 Finally, you can also display in a split scratch buffer either the last list
 of failed tests (with line numbers, errors and paths) or the last ``py.test``
 session (similar to what you would see in a terminal). The arguments that 
@@ -142,9 +152,39 @@ in the no-capture flag::
 Again the above command shows `class` but you can use this with all the objects
 supported (`class`, `method` and `file`).
 
+==============================================================================
+4. Shell Support                                                *ShellSupport*
+
+This plugin provides a way to have a better shell experience when running
+`verbose` or `pdb` flags by using the `Conque.vim` plugin. If you have this
+most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?script_id=2771)
+then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 
 ==============================================================================
-3. License                                                      *PytestLicense*
+4. Loop on Fail                                                   *LooponFail*
+
+This is an *extra* option that will allow you to loop (run again) on fail.
+If the test fails, then this option will make Vim run the same test again as 
+soon as the file is written.
+
+Once the test passes, it will no longer re-run the tests again. This option is
+available for `class`, `method`, `function` and `file`.
+You would call it like::
+
+    :Pytest method looponfail
+
+If for some reason you need to reset and clear all global variables that affect
+the plugin you can do so by running the following command::
+
+    :Pytest clear
+
+This is specifically useful when `looponfail` has been enabled and you want to
+stop its automatic behavior. Remember that `looponfail` will run every time you 
+write the buffer and will keep doing so unless your test passes.
+
+
+==============================================================================
+5. License                                                     *PytestLicense*
 
 MIT
 Copyright (c) 2011 Alfredo Deza <alfredodeza [at] gmail [dot] com>
@@ -168,13 +208,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==============================================================================
-4. Bugs                                                            *PytestBugs*
+6. Bugs                                                            *PytestBugs*
 
 If you find a bug please post it on the issue tracker:
 https://github.com/alfredodeza/pytest.vim/issues
 
 ==============================================================================
-5. Credits                                                      *PytestCredits*
+7. Credits                                                      *PytestCredits*
 
 Thanks to Holger Krekel for the awesome py.test tool as it makes my life so
 much better.
