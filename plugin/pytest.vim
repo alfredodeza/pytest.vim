@@ -240,8 +240,9 @@ endfun
 " Always goes back to the first instance
 " and returns that if found
 function! s:FindPythonObject(obj)
-    let orig_line = line('.')
-    let orig_col = col('.')
+    let orig_line   = line('.')
+    let orig_col    = col('.')
+    let orig_indent = indent(orig_line)
 
     if (a:obj == "class")
         let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*'
@@ -252,11 +253,15 @@ function! s:FindPythonObject(obj)
     endif
 
     let flag = "Wb"
-    let result = search(objregexp, flag)
 
-    if result
-        return result
-    endif
+    while search(objregexp, flag) > 0
+        if orig_indent > 0
+            if orig_indent > indent(line('.'))
+                return 1
+            endif
+        endif
+        return 1
+    endwhile
 
 endfunction
 
@@ -670,14 +675,17 @@ endfunction
 
 
 function! s:ThisMethod(verbose, ...)
+    let save_cursor = getpos('.')
     call s:ClearAll()
     let m_name  = s:NameOfCurrentMethod()
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
     if (strlen(m_name) == 1)
+        call setpos('.', save_cursor)
         call s:Echo("Unable to find a matching method for testing")
         return
     elseif (strlen(c_name) == 1)
+        call setpos('.', save_cursor)
         call s:Echo("Unable to find a matching class for testing")
         return
     endif
@@ -699,10 +707,12 @@ endfunction
 
 
 function! s:ThisFunction(verbose, ...)
+    let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentFunction()
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
+        call setpos('.', save_cursor)
         call s:Echo("Unable to find a matching function for testing")
         return
     endif
@@ -725,10 +735,12 @@ endfunction
 
 
 function! s:ThisClass(verbose, ...)
+    let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentClass()
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
+        call setpos('.', save_cursor)
         call s:Echo("Unable to find a matching class for testing")
         return
     endif
