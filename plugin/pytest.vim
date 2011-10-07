@@ -1,12 +1,12 @@
 " File:        pytest.vim
 " Description: Runs the current test Class/Method/Function/File with
-"              py.test 
+"              py.test
 " Maintainer:  Alfredo Deza <alfredodeza AT gmail.com>
 " License:     MIT
 "============================================================================
 
 
-if exists("g:loaded_pytest") || &cp 
+if exists("g:loaded_pytest") || &cp
   finish
 endif
 
@@ -73,7 +73,7 @@ function! s:LoopOnFail(type)
             autocmd! BufWritePost *.py call s:LoopProxy('file')
         endif
     else
-        au! 
+        au!
     endif
 
 endfunction
@@ -96,7 +96,7 @@ function! s:LoopProxy(type)
         " Go to the very bottom window
         call feedkeys("\<C-w>b", 'n')
     else
-        au! 
+        au!
     endif
 endfunction
 
@@ -111,7 +111,7 @@ function! s:GoToInlineError(direction)
     if move_to > last_line
         let move_to = 1
         exe move_to
-    elseif move_to <= 1 
+    elseif move_to <= 1
         let move_to = last_line
         exe move_to
     else
@@ -254,7 +254,7 @@ function! s:FindPythonObject(obj)
     let flag = "Wb"
     let result = search(objregexp, flag)
 
-    if result 
+    if result
         return result
     endif
 
@@ -308,7 +308,7 @@ endfunction
 
 function! s:RunInSplitWindow(path)
     let cmd = "py.test --tb=short " . a:path
-    if exists("g:ConqueTerm_Loaded") 
+    if exists("g:ConqueTerm_Loaded")
         call conque_term#open(cmd, ['split', 'resize 20'], 0)
     else
         let command = join(map(split(cmd), 'expand(v:val)'))
@@ -326,7 +326,7 @@ endfunction
 function! s:OpenError(path)
 	let winnr = bufwinnr('GoToError.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . ' GoToError.pytest' : winnr . 'wincmd w'
-	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number 
+	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
     silent! execute ":e " . a:path
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
 endfunction
@@ -380,7 +380,7 @@ function! s:ShowFails(...)
 	silent! execute  winnr < 0 ? 'botright new ' . 'Fails.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
     let blank_line = repeat(" ",&columns - 1)
-    exe "normal i" . blank_line 
+    exe "normal i" . blank_line
     hi RedBar ctermfg=white ctermbg=red guibg=red
     match RedBar /\%1l/
     for err in keys(g:pytest_session_errors)
@@ -395,7 +395,7 @@ function! s:ShowFails(...)
             let message = printf('Line: %-*u ==>> %-*s ==>> %s', 6, line_number, 24, exception, ends)
         endif
         let error_number = err + 1
-        call setline(error_number, message)    
+        call setline(error_number, message)
     endfor
 	silent! execute 'resize ' . line('$')
     nnoremap <silent> <buffer> q       :q! <CR>
@@ -442,6 +442,7 @@ function! s:ToggleFailWindow()
     else
         silent! execute winnr . 'wincmd w'
         silent! execute 'q'
+        silent! execute 'wincmd p'
     endif
 endfunction
 
@@ -453,6 +454,7 @@ function! s:ToggleLastSession()
     else
         silent! execute winnr . 'wincmd w'
         silent! execute 'q'
+        silent! execute 'wincmd p'
     endif
 endfunction
 
@@ -464,6 +466,7 @@ function! s:ToggleShowError()
     else
         silent! execute winnr . 'wincmd w'
         silent! execute 'q'
+        silent! execute 'wincmd p'
     endif
 endfunction
 
@@ -494,7 +497,7 @@ function! s:RunPyTest(path)
     let g:pytest_last_session = ""
     let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
-    
+
     " Pointers and default variables
     let g:pytest_session_errors = {}
     let g:pytest_session_error  = 0
@@ -509,11 +512,11 @@ function! s:RunPyTest(path)
             return
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
             call s:RedBar()
-            echo "py.test had an Error, see :Pytest session for more information" 
+            echo "py.test had an Error, see :Pytest session for more information"
             return
         elseif w =~ '\v^(.*)\s*INTERNALERROR'
             call s:RedBar()
-            echo "py.test had an InternalError, see :Pytest session for more information" 
+            echo "py.test had an InternalError, see :Pytest session for more information"
             return
         endif
     endfor
@@ -571,7 +574,7 @@ function! s:ParseFailures(stdout)
             endif
         elseif w =~  '\v^E\s+(.*)\s+'
             let split_error = split(w, "E ")
-            let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
+            let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g")
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
             if (len(match_error))
                 let error.exception = match_error[1]
@@ -626,7 +629,7 @@ function! s:ParseErrors(stdout)
             let split_error = split(w, "E ")
             let match_error = matchlist(split_error[0], '\v(\w+):')
             let error['exception'] = match_error[1]
-            let flat_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g") 
+            let flat_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g")
             let error.error = flat_error
         endif
     endfor
@@ -679,8 +682,8 @@ function! s:ThisMethod(verbose, ...)
         return
     endif
 
-    let path =  abspath . "::" . c_name . "::" . m_name 
-    let message = "py.test ==> Running test for method " . m_name 
+    let path =  abspath . "::" . c_name . "::" . m_name
+    let message = "py.test ==> Running test for method " . m_name
     call s:Echo(message, 1)
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
@@ -703,7 +706,7 @@ function! s:ThisFunction(verbose, ...)
         call s:Echo("Unable to find a matching function for testing")
         return
     endif
-    let message  = "py.test ==> Running tests for function " . c_name 
+    let message  = "py.test ==> Running tests for function " . c_name
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
@@ -729,7 +732,7 @@ function! s:ThisClass(verbose, ...)
         call s:Echo("Unable to find a matching class for testing")
         return
     endif
-    let message  = "py.test ==> Running tests for class " . c_name 
+    let message  = "py.test ==> Running tests for class " . c_name
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
@@ -767,7 +770,7 @@ endfunction
 
 function! s:Pdb(path, ...)
     let pdb_command = "py.test " . a:1 . " " . a:path
-    if exists("g:ConqueTerm_Loaded") 
+    if exists("g:ConqueTerm_Loaded")
         call conque_term#open(pdb_command, ['split', 'resize 20'], 0)
     else
         exe ":!" . pdb_command
