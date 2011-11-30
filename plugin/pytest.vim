@@ -403,8 +403,8 @@ function! s:ShowFails(...)
         call setline(error_number, message)
     endfor
 	silent! execute 'resize ' . line('$')
-    nnoremap <silent> <buffer> q       :q! <CR>
-    nnoremap <silent> <buffer> <Enter> :q! <CR>
+    nnoremap <silent> <buffer> q       :call <sid>ClearAll(1)<CR>
+    nnoremap <silent> <buffer> <Enter> :call <sid>ClearAll(1)<CR>
     nnoremap <script> <buffer> <C-n>   :call <sid>GoToInlineError(1)<CR>
     nnoremap <script> <buffer> <down>  :call <sid>GoToInlineError(1)<CR>
     nnoremap <script> <buffer> j       :call <sid>GoToInlineError(1)<CR>
@@ -476,7 +476,8 @@ function! s:ToggleShowError()
 endfunction
 
 
-function! s:ClearAll()
+function! s:ClearAll(...)
+    let current_window = winnr()
     let bufferL = [ 'Fails.pytest', 'LastSession.pytest', 'ShowError.pytest', 'PytestVerbose.pytest' ]
     for b in bufferL
         let _window = bufwinnr(b)
@@ -485,7 +486,12 @@ function! s:ClearAll()
             silent! execute 'q'
         endif
     endfor
-
+    " Remove any echoed messages
+    if (a:0 == 1)
+        call s:Echo('')
+    endif
+    " Try going back to our starting window
+    silent! execute current_window . 'wincmd w'
 endfunction
 
 
