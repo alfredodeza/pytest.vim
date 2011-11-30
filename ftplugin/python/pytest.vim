@@ -477,7 +477,6 @@ endfunction
 
 
 function! s:ClearAll(...)
-    let current_window = winnr()
     let bufferL = [ 'Fails.pytest', 'LastSession.pytest', 'ShowError.pytest', 'PytestVerbose.pytest' ]
     for b in bufferL
         let _window = bufwinnr(b)
@@ -491,7 +490,7 @@ function! s:ClearAll(...)
         call s:Echo('')
     endif
     " Try going back to our starting window
-    silent! execute current_window . 'wincmd w'
+    silent! execute 'wincmd p'
 endfunction
 
 
