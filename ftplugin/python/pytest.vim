@@ -434,7 +434,8 @@ function! s:LastSession()
     call append(0, session)
 	silent! execute 'resize ' . line('$')
     silent! execute 'normal gg'
-    silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+    nnoremap <silent> <buffer> q       :call <sid>ClearAll(1)<CR>
+    nnoremap <silent> <buffer> <Enter> :call <sid>ClearAll(1)<CR>
     call s:PytestSyntax()
     exe 'wincmd p'
 endfunction
@@ -487,10 +488,11 @@ function! s:ClearAll(...)
     endfor
     " Remove any echoed messages
     if (a:0 == 1)
+        " Try going back to our starting window
+        " and remove any left messages
         call s:Echo('')
+        silent! execute 'wincmd p'
     endif
-    " Try going back to our starting window
-    silent! execute 'wincmd p'
 endfunction
 
 
