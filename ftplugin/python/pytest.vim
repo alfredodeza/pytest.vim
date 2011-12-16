@@ -11,6 +11,16 @@ if exists("g:loaded_pytest") || &cp
 endif
 
 
+" Global variables for shell execution
+  " for use with Py.Test
+let g:cmd_to_run = "py.test --tb=short " "py.tests
+let g:class_delimiter = "::"
+let g:method_delimiter = "::"
+  " for use with Nose Tests
+"let g:cmd_to_run = "nosetests " "Nose Tests
+"let g:class_delimiter = ":"
+"let g:method_delimiter = "."
+
 " Global variables for registering next/previous error
 let g:pytest_session_errors    = {}
 let g:pytest_session_error     = 0
@@ -312,7 +322,7 @@ endfunction
 
 
 function! s:RunInSplitWindow(path)
-    let cmd = "py.test --tb=short " . a:path
+    let cmd = g:cmd_to_run . a:path
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(cmd, ['split', 'resize 20'], 0)
     else
@@ -507,7 +517,7 @@ endfunction!
 
 function! s:RunPyTest(path)
     let g:pytest_last_session = ""
-    let cmd = "py.test --tb=short " . a:path
+    let cmd = g:cmd_to_run . a:path
     let out = system(cmd)
 
     " Pointers and default variables
@@ -697,7 +707,7 @@ function! s:ThisMethod(verbose, ...)
         return
     endif
 
-    let path =  abspath . "::" . c_name . "::" . m_name
+    let path =  abspath . g:class_delimiter . c_name . g:method_delimiter . m_name
     let message = "py.test ==> Running test for method " . m_name
     call s:Echo(message, 1)
 
@@ -726,7 +736,7 @@ function! s:ThisFunction(verbose, ...)
     let message  = "py.test ==> Running tests for function " . c_name
     call s:Echo(message, 1)
 
-    let path = abspath . "::" . c_name
+    let path = abspath . g:class_delimiter . c_name
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
         call s:Pdb(path, a:1)
@@ -754,7 +764,7 @@ function! s:ThisClass(verbose, ...)
     let message  = "py.test ==> Running tests for class " . c_name
     call s:Echo(message, 1)
 
-    let path = abspath . "::" . c_name
+    let path = abspath . g:class_delimiter . c_name
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
         call s:Pdb(path, a:1)
