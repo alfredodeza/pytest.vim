@@ -356,7 +356,7 @@ function! s:ShowError()
 
 	let winnr = bufwinnr('ShowError.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . ' ShowError.pytest' : winnr . 'wincmd w'
-	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile number filetype=python
+	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile number nowrap
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
     let line_number = error_dict['file_line']
     let error = error_dict['error']
