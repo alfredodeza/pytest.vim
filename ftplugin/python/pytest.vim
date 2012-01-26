@@ -137,7 +137,7 @@ function! s:GoToInlineError(direction)
         let file_name    = expand("%:t")
         if error_path =~ file_name
             execute line_number
-            execute 'normal zz'
+            execute 'normal! zz'
             exe 'wincmd p'
             let orig_line = _num+1
             exe orig_line
