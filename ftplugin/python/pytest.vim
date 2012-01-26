@@ -268,7 +268,7 @@ endfunction
 
 function! s:NameOfCurrentClass()
     let save_cursor = getpos(".")
-    normal $<cr>
+    normal! $<cr>
     let find_object = s:FindPythonObject('class')
     if (find_object)
         let line = getline('.')
@@ -281,7 +281,7 @@ endfunction
 
 function! s:NameOfCurrentMethod()
     let save_cursor = getpos(".")
-    normal $<cr>
+    normal! $<cr>
     let find_object = s:FindPythonObject('method')
     if (find_object)
         let line = getline('.')
@@ -294,7 +294,7 @@ endfunction
 
 function! s:NameOfCurrentFunction()
     let save_cursor = getpos(".")
-    normal $<cr>
+    normal! $<cr>
     let find_object = s:FindPythonObject('function')
     if (find_object)
         let line = getline('.')
@@ -385,7 +385,7 @@ function! s:ShowFails(...)
 	silent! execute  winnr < 0 ? 'botright new ' . 'Fails.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number filetype=pytest
     let blank_line = repeat(" ",&columns - 1)
-    exe "normal i" . blank_line
+    exe "normal! i" . blank_line
     hi RedBar ctermfg=white ctermbg=red guibg=red
     match RedBar /\%1l/
     for err in keys(g:pytest_session_errors)
@@ -412,7 +412,7 @@ function! s:ShowFails(...)
     nnoremap <script> <buffer> <up>    :call <sid>GoToInlineError(-1)<CR>
     nnoremap <script> <buffer> k       :call <sid>GoToInlineError(-1)<CR>
     call s:PytestFailsSyntax()
-    exe "normal 0|h"
+    exe "normal! 0|h"
     if (! gain_focus)
         exe 'wincmd p'
     else
@@ -433,7 +433,7 @@ function! s:LastSession()
     let session = split(g:pytest_last_session, '\n')
     call append(0, session)
 	silent! execute 'resize ' . line('$')
-    silent! execute 'normal gg'
+    silent! execute 'normal! gg'
     nnoremap <silent> <buffer> q       :call <sid>ClearAll(1)<CR>
     nnoremap <silent> <buffer> <Enter> :call <sid>ClearAll(1)<CR>
     call s:PytestSyntax()
