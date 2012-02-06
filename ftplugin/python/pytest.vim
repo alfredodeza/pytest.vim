@@ -255,12 +255,13 @@ function! s:FindPythonObject(obj)
     let flag = "Wb"
 
     while search(objregexp, flag) > 0
-        if orig_indent > 0
-            if orig_indent > indent(line('.'))
-                return 1
-            endif
+        "
+        " Very naive, but if the indent is less than or equal to four
+        " keep on going because we assume you are nesting.
+        "
+        if indent(line('.')) <= 4
+            return 1
         endif
-        return 1
     endwhile
 
 endfunction
