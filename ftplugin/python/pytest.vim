@@ -632,11 +632,16 @@ function! s:ParseErrors(stdout)
             let match_file = matchlist(split_file[0], '\v"(.*.py)"')
             let error['file_path'] = match_file[1]
             let error['path'] = match_file[1]
-        elseif w =~ '\v^(.*)\.py:(\d+):'
-            let match_result = matchlist(w, '\v:(\d+):')
+        elseif w =~ '\v^(.*)\.py:(\d+)'
+            let match_result = matchlist(w, '\v:(\d+)')
             let error.line = match_result[1]
             let file_path = matchlist(w, '\v(.*.py):')
             let error.path = file_path[1]
+            echo match_result
+            echo error.line
+            echo file_path
+            echo error.path
+            "return
         endif
         if w =~ '\v^E\s+(\w+):\s+'
             let split_error = split(w, "E ")
@@ -652,6 +657,11 @@ function! s:ParseErrors(stdout)
         let error.file_path = error.path
         let error.file_line = error.line
     endtry
+
+    " FIXME
+    " Now try to really make sure we have some stuff to pass
+    " who knows if we are getting more of these :/ quick fix for now
+    let error['exception'] = get(error, 'exception', 'UnmatchedException')
     let errors[1] = error
 
     " Display the result Bars
