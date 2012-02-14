@@ -657,6 +657,7 @@ function! s:ParseErrors(stdout)
     " Now try to really make sure we have some stuff to pass
     " who knows if we are getting more of these :/ quick fix for now
     let error['exception'] = get(error, 'exception', 'UnmatchedException')
+    let error['error']     = get(error, 'error', 'py.test had an error, please see :Pytest session for more information')
     let errors[1] = error
 
     " Display the result Bars
