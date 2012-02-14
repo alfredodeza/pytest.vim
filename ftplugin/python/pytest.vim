@@ -101,6 +101,14 @@ function! s:LoopProxy(type)
 endfunction
 
 
+" Close the Pytest buffer if it is the last one open
+function! s:CloseIfLastWindow()
+  if winnr("$") == 1
+    q
+  endif
+endfunction
+
+
 function! s:GoToInlineError(direction)
     let orig_line = line('.')
     let last_line = line('$')
@@ -435,6 +443,7 @@ function! s:LastSession()
     call append(0, session)
 	silent! execute 'resize ' . line('$')
     silent! execute 'normal! gg'
+    autocmd! BufEnter LastSession.pytest call s:CloseIfLastWindow()
     nnoremap <silent> <buffer> q       :call <sid>ClearAll(1)<CR>
     nnoremap <silent> <buffer> <Enter> :call <sid>ClearAll(1)<CR>
     call s:PytestSyntax()
