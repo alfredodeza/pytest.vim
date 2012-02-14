@@ -334,6 +334,7 @@ function! s:RunInSplitWindow(path)
         silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
         call s:PytestSyntax()
     endif
+    autocmd! BufEnter LastSession.pytest call s:CloseIfLastWindow()
 endfunction
 
 
@@ -343,6 +344,7 @@ function! s:OpenError(path)
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
     silent! execute ":e " . a:path
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
+    autocmd! BufEnter LastSession.pytest call s:CloseIfLastWindow()
 endfunction
 
 
@@ -366,6 +368,7 @@ function! s:ShowError()
 	let winnr = bufwinnr('ShowError.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . ' ShowError.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile number nowrap
+    autocmd! BufEnter LastSession.pytest call s:CloseIfLastWindow()
     silent! execute 'nnoremap <silent> <buffer> q :q! <CR>'
     let line_number = error_dict['file_line']
     let error = error_dict['error']
@@ -412,6 +415,7 @@ function! s:ShowFails(...)
         call setline(error_number, message)
     endfor
 	silent! execute 'resize ' . line('$')
+    autocmd! BufEnter LastSession.pytest call s:CloseIfLastWindow()
     nnoremap <silent> <buffer> q       :call <sid>ClearAll(1)<CR>
     nnoremap <silent> <buffer> <Enter> :call <sid>ClearAll(1)<CR>
     nnoremap <script> <buffer> <C-n>   :call <sid>GoToInlineError(1)<CR>
