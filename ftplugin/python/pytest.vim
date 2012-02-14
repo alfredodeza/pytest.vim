@@ -637,11 +637,6 @@ function! s:ParseErrors(stdout)
             let error.line = match_result[1]
             let file_path = matchlist(w, '\v(.*.py):')
             let error.path = file_path[1]
-            echo match_result
-            echo error.line
-            echo file_path
-            echo error.path
-            "return
         endif
         if w =~ '\v^E\s+(\w+):\s+'
             let split_error = split(w, "E ")
