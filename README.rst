@@ -8,19 +8,17 @@ it would be neat to be able to call it from vim and get some immediate results.
 This is especially useful when you are tweaking and do not want to be moving
 around between the terminal and your vim session.
 
-Screencast:
-http://vimeo.com/19774046
+*Following might be a bit outdated!*
 
-Screenshots:
+* Screencast: http://vimeo.com/19774046
 
-Failing Tests
-http://www.flickr.com/photos/aldegaz/5398749422
+* Failing Tests http://www.flickr.com/photos/aldegaz/5398749422
 
-Passing Tests
-http://www.flickr.com/photos/aldegaz/5395135539
+* Passing Tests http://www.flickr.com/photos/aldegaz/5395135539
 
-Verbose Mode
-http://www.flickr.com/photos/aldegaz/5398148049/
+* Verbose Mode http://www.flickr.com/photos/aldegaz/5398148049/
+
+Newer versions of this plugin behave and look better. Try it out!
 
 Usage
 =====
