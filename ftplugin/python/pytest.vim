@@ -62,8 +62,11 @@ endfunction
 
 function! s:LoopOnFail(type)
 
-    if g:pytest_looponfail == 1
-        if a:type == 'method'
+    augroup pytest_loop_autocmd
+        au!
+        if g:pytest_looponfail == 0
+            return
+        elseif a:type == 'method'
             autocmd! BufWritePost *.py call s:LoopProxy('method')
         elseif a:type == 'class'
             autocmd! BufWritePost *.py call s:LoopProxy('class')
@@ -72,9 +75,7 @@ function! s:LoopOnFail(type)
         elseif a:type == 'file'
             autocmd! BufWritePost *.py call s:LoopProxy('file')
         endif
-    else
-        au!
-    endif
+    augroup END
 
 endfunction
 
@@ -96,7 +97,7 @@ function! s:LoopProxy(type)
         " Go to the very bottom window
         call feedkeys("\<C-w>b", 'n')
     else
-        au!
+        au! pytest_loop_autocmd
     endif
 endfunction
 
