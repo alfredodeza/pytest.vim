@@ -12,6 +12,8 @@ around between the terminal and your vim session.
 
 *Following might be a bit outdated!*
 
+.. image:: http://www.flickr.com/photos/aldegaz/5414279043/
+
 * Screencast: http://vimeo.com/19774046
 
 * Failing Tests http://www.flickr.com/photos/aldegaz/5398749422
