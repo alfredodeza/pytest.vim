@@ -12,7 +12,7 @@ around between the terminal and your vim session.
 
 *Following might be a bit outdated!*
 
-.. image:: http://www.flickr.com/photos/aldegaz/5414279043/
+.. image:: https://github.com/alfredodeza/pytest.vim/raw/master/extras/session.png
 
 * Screencast: http://vimeo.com/19774046
 
