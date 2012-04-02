@@ -10,13 +10,19 @@ it would be neat to be able to call it from vim and get some immediate results.
 This is especially useful when you are tweaking and do not want to be moving
 around between the terminal and your vim session.
 
+* Screencast: http://vimeo.com/19774046
+
+Showing a Session
+-----------------
 
 .. image:: https://github.com/alfredodeza/pytest.vim/raw/master/extras/session.png
 
-* Screencast: http://vimeo.com/19774046
 
+Fail tests and Errors
+---------------------
 
-Newer versions of this plugin behave and look better. Try it out!
+.. image:: https://github.com/alfredodeza/pytest.vim/raw/master/extras/fails.png
+
 
 Usage
 =====
