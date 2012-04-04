@@ -94,8 +94,10 @@ function! s:LoopProxy(type)
             call s:ThisFile(0, 'False')
         endif
 
+        " FIXME Removing this for now until I can find
+        " a way of getting the bottom only on fails
         " Go to the very bottom window
-        call feedkeys("\<C-w>b", 'n')
+        "call feedkeys("\<C-w>b", 'n')
     else
         au! pytest_loop_autocmd
     endif
