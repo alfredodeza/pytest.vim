@@ -695,7 +695,7 @@ endfunction
 
 function! s:GreenBar()
     redraw
-    hi GreenBar ctermfg=white ctermbg=green guibg=green
+    hi GreenBar ctermfg=white ctermbg=40 guibg=green
     echohl GreenBar
     echon repeat(" ",&columns - 1)
     echohl
