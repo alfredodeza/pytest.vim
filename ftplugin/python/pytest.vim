@@ -495,6 +495,7 @@ endfunction
 
 
 function! s:ClearAll(...)
+    let current = winnr()
     let bufferL = [ 'Fails.pytest', 'LastSession.pytest', 'ShowError.pytest', 'PytestVerbose.pytest' ]
     for b in bufferL
         let _window = bufwinnr(b)
@@ -503,6 +504,7 @@ function! s:ClearAll(...)
             silent! execute 'q'
         endif
     endfor
+    execute current . 'wincmd w'
     " Remove any echoed messages
     if (a:0 == 1)
         " Try going back to our starting window
