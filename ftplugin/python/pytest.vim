@@ -504,13 +504,15 @@ function! s:ClearAll(...)
             silent! execute 'q'
         endif
     endfor
-    execute current . 'wincmd w'
+
     " Remove any echoed messages
     if (a:0 == 1)
         " Try going back to our starting window
         " and remove any left messages
         call s:Echo('')
         silent! execute 'wincmd p'
+    else
+        execute current . 'wincmd w'
     endif
 endfunction
 
