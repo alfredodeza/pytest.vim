@@ -841,6 +841,11 @@ endfunction
 
 
 function! s:Proxy(action, ...)
+    if (executable("py.test") == 0)
+        call s:Echo("py.test not found. This plugin needs py.test installed and accessible")
+        return
+    endif
+
     " Some defaults
     let verbose = 0
     let pdb     = 'False'
