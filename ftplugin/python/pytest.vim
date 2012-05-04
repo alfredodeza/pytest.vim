@@ -142,6 +142,7 @@ function! s:GoToInlineError(direction)
         let line_number  = select_error['file_line']
         let error_path   = select_error['file_path']
         let exception    = select_error['exception']
+        let error        = select_error['error']
 
         " Go to previous window
         exe 'wincmd p'
@@ -152,7 +153,7 @@ function! s:GoToInlineError(direction)
             exe 'wincmd p'
             let orig_line = _num+1
             exe orig_line
-            let message = "Failed test: " . _num . "\t ==>> " . exception
+            let message = "Failed test: " . _num . "\t ==>> " . exception . " ". error
             call s:Echo(message, 1)
             return
         else " we might have an error on another file
@@ -217,6 +218,7 @@ function! s:GoToError(direction)
             let line_number = select_error['line']
             let error_path = select_error['path']
             let exception = select_error['exception']
+            let error = select_error['error']
             let file_name = expand("%:t")
             if error_path =~ file_name
                 execute line_number
@@ -224,7 +226,7 @@ function! s:GoToError(direction)
                 call s:OpenError(error_path)
                 execute line_number
             endif
-            let message = going . " Failed test: " . g:pytest_session_error . "\t ==>> " . exception
+            let message = going . " Failed test: " . g:pytest_session_error . "\t ==>> " . exception . " " . error
             call s:Echo(message, 1)
             return
         endif
@@ -409,8 +411,9 @@ function! s:ShowFails(...)
         let exception   = err_dict['exception']
         let path_error  = err_dict['path']
         let ends        = err_dict['file_path']
+        let error       = err_dict['error']
         if (path_error == ends)
-            let message = printf('Line: %-*u ==>> %-*s ==>> %s', 6, line_number, 24, exception, path_error)
+            let message = printf('Line: %-*u ==>> %-*s %s ==>> %s', 6, line_number, 14, exception, error, path_error)
         else
             let message = printf('Line: %-*u ==>> %-*s ==>> %s', 6, line_number, 24, exception, ends)
         endif
@@ -605,7 +608,7 @@ function! s:ParseFailures(stdout)
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.file_path = file_path[1]
             endif
-        elseif w =~  '\v^E\s+(.*)\s+'
+        elseif w =~  '\v^E\s+\w+(.*)\s+'
             let split_error = split(w, "E ")
             let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g")
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
