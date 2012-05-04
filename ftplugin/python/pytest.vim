@@ -613,7 +613,7 @@ function! s:ParseFailures(stdout)
                 let error.exception = match_error[1]
                 let error.error = match_error[2]
             else
-                let error.exception = "UnmatchedException"
+                let error.exception = "AssertionError"
                 let error.error = actual_error
             endif
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
@@ -676,7 +676,7 @@ function! s:ParseErrors(stdout)
     " FIXME
     " Now try to really make sure we have some stuff to pass
     " who knows if we are getting more of these :/ quick fix for now
-    let error['exception'] = get(error, 'exception', 'UnmatchedException')
+    let error['exception'] = get(error, 'exception', 'AssertionError')
     let error['error']     = get(error, 'error', 'py.test had an error, please see :Pytest session for more information')
     let errors[1] = error
 
