@@ -852,7 +852,7 @@ endfunction
 
 
 function! s:Version()
-    call s:Echo("pytest.vim version 1.1.3dev", 1)
+    call s:Echo("pytest.vim version 1.1.4dev", 1)
 endfunction
 
 
