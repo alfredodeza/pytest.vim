@@ -556,7 +556,7 @@ function! s:RunPyTest(path)
             return
         endif
     endfor
-    call s:GreenBar()
+    call s:ParseSuccess(out)
 
     " If looponfail is set we no longer need it
     " So clear the autocomand and set the global var to 0
@@ -693,6 +693,30 @@ function! s:ParseErrors(stdout)
 endfunction
 
 
+function! s:ParseSuccess(stdout) abort
+    let passed = 0
+    " A passing test (or tests would look like:
+    " ========================== 17 passed in 0.43 seconds ===========================
+    " this would insert that into the resulting GreenBar
+    for w in split(a:stdout, '\n')
+        if w =~ '\v^\={14,}\s+\d+\s+passed\s+in\s+'
+            let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
+        endif
+    endfor
+    " fix this obvious redundancy
+    if passed
+        redraw
+        let length = strlen(passed)
+        hi GreenBar ctermfg=white ctermbg=green guibg=green
+        echohl GreenBar
+        echon passed . repeat(" ",&columns - length)
+        echohl
+    else
+        call s:GreenBar()
+    endif
+endfunction
+
+
 function! s:RedBar()
     redraw
     hi RedBar ctermfg=white ctermbg=red guibg=red
@@ -706,7 +730,7 @@ function! s:GreenBar()
     redraw
     hi GreenBar ctermfg=white ctermbg=green guibg=green
     echohl GreenBar
-    echon repeat(" ",&columns - 1)
+    echon "All tests passed." . repeat(" ",&columns - 18)
     echohl
 endfunction
 
