@@ -706,8 +706,8 @@ function! s:ParseSuccess(stdout) abort
     " fix this obvious redundancy
     if passed
         redraw
-        let length = strlen(passed)
-        hi GreenBar ctermfg=white ctermbg=green guibg=green
+        let length = strlen(passed) + 1
+        hi GreenBar ctermfg=black ctermbg=green guibg=green
         echohl GreenBar
         echon passed . repeat(" ",&columns - length)
         echohl
@@ -728,7 +728,7 @@ endfunction
 
 function! s:GreenBar()
     redraw
-    hi GreenBar ctermfg=white ctermbg=green guibg=green
+    hi GreenBar ctermfg=black ctermbg=green guibg=green
     echohl GreenBar
     echon "All tests passed." . repeat(" ",&columns - 18)
     echohl
