@@ -203,16 +203,6 @@ If you hit an error that displays not the previous window (e.g. your test file)
 then a message will state that it is skipping.
 
 
-Development Release
-===================
-If you are checking out this plugin from the Git repository instead of an
-official release from vim.org then you need to know that some
-things/implementations are considered *alpha* (they WILL break!). I usually
-list them here, so please take note before using them.
-
-The current development version does not have any un-released features.
-
-
 License
 -------
 
