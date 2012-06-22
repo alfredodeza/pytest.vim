@@ -697,7 +697,8 @@ function! s:ParseSuccess(stdout) abort
     let passed = 0
     " A passing test (or tests would look like:
     " ========================== 17 passed in 0.43 seconds ===========================
-    " this would insert that into the resulting GreenBar
+    " this would insert that into the resulting GreenBar but only the
+    " interesting portion
     for w in split(a:stdout, '\n')
         if w =~ '\v^\={14,}\s+\d+\s+passed\s+in\s+'
             let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
@@ -852,7 +853,7 @@ endfunction
 
 
 function! s:Version()
-    call s:Echo("pytest.vim version 1.1.4dev", 1)
+    call s:Echo("pytest.vim version 1.1.4", 1)
 endfunction
 
 
@@ -946,4 +947,3 @@ endfunction
 
 
 command! -nargs=+ -complete=custom,s:Completion Pytest call s:Proxy(<f-args>)
-
