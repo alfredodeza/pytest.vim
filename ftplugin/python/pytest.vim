@@ -320,7 +320,7 @@ endfunction
 
 
 function! s:CurrentPath()
-    let cwd = expand("%:p")
+    let cwd = '"' . expand("%:p") . '"'
     return cwd
 endfunction
 
