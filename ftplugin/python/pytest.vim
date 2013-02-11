@@ -708,7 +708,10 @@ function! s:ParseSuccess(stdout) abort
     if passed
         redraw
         let length = strlen(passed) + 1
-        hi GreenBar ctermfg=black ctermbg=green guibg=green
+        " The GUI looks too bright with plain green as a background
+        " so make sure we use a solarized-like green and set the foreground
+        " to black
+        hi GreenBar ctermfg=black ctermbg=green guibg=#719e07 guifg=black
         echohl GreenBar
         echon passed . repeat(" ",&columns - length)
         echohl
