@@ -758,7 +758,11 @@ function! s:ThisMethod(verbose, ...)
     let path =  abspath . "::" . c_name . "::" . m_name
     let message = "py.test ==> Running test for method " . m_name
     call s:Echo(message, 1)
-
+    if len(a:2)
+      echom 'this method has delgao!'
+      call s:Delgado(path, a:2)
+      return
+    endif
     if ((a:1 == '--pdb') || (a:1 == '-s'))
         call s:Pdb(path, a:1)
         return
@@ -855,6 +859,24 @@ function! s:Pdb(path, ...)
 endfunction
 
 
+function! s:Delgado(path, arguments)
+    echom string(a:arguments)
+    let args = a:arguments[1:]
+    echom string(args)
+    let str_args = ""
+    if len(args)
+      for item in args
+        let str_args = str_args . '\"' . item .'\",'
+      endfor
+    endif
+    let args_as_list = '[' . str_args . '\"' . a:path . '\"]'
+    let json_arg = '{\"py.test\" :'. args_as_list . '}'
+    let command = ":!" . "echo \"" . json_arg . "\"| nc -U /tmp/socketname"
+    echom command
+    exe command
+endfunction
+
+
 function! s:Version()
     call s:Echo("pytest.vim version 1.1.4", 1)
 endfunction
@@ -881,6 +903,7 @@ function! s:Proxy(action, ...)
     let verbose = 0
     let pdb     = 'False'
     let looponfail = 0
+    let delgado = []
 
     if (a:0 > 0)
         if (a:1 == 'verbose')
@@ -892,35 +915,37 @@ function! s:Proxy(action, ...)
         elseif (a:1 == 'looponfail')
             let g:pytest_looponfail = 1
             let looponfail = 1
+        elseif (a:1 == 'delgado')
+            let delgado = a:000
         endif
     endif
     if (a:action == "class")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisClass(verbose, pdb)
+            call s:ThisClass(verbose, pdb, delgado)
         else
-            call s:ThisClass(verbose, pdb)
+            call s:ThisClass(verbose, pdb, delgado)
         endif
     elseif (a:action == "method")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisMethod(verbose, pdb)
+            call s:ThisMethod(verbose, pdb, delgado)
         else
-            call s:ThisMethod(verbose, pdb)
+            call s:ThisMethod(verbose, pdb, delgado)
         endif
     elseif (a:action == "function")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisFunction(verbose, pdb)
+            call s:ThisFunction(verbose, pdb, delgado)
         else
-            call s:ThisFunction(verbose, pdb)
+            call s:ThisFunction(verbose, pdb, delgado)
         endif
     elseif (a:action == "file")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisFile(verbose, pdb)
+            call s:ThisFile(verbose, pdb, delgado)
         else
-            call s:ThisFile(verbose, pdb)
+            call s:ThisFile(verbose, pdb, delgado)
         endif
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
