@@ -882,6 +882,9 @@ function! s:Delgado(path, arguments)
     let args_as_list = '[' . str_args . '\"' . a:path . '\"]'
     let json_arg = '{\"py.test\" :'. args_as_list . '}'
     let command = ":!" . "echo \"" . json_arg . "\"| nc -U /tmp/pytest.sock"
+    " If debugging this, uncomment the next line
+    " so that it echoes to :messages
+    " echom command
     silent! exe command
 endfunction
 
