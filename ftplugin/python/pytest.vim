@@ -759,7 +759,6 @@ function! s:ThisMethod(verbose, ...)
     let message = "py.test ==> Running test for method " . m_name
     call s:Echo(message, 1)
     if len(a:2)
-      echom 'this method has delgao!'
       call s:Delgado(path, a:2)
       return
     endif
@@ -790,6 +789,11 @@ function! s:ThisFunction(verbose, ...)
 
     let path = abspath . "::" . c_name
 
+    if len(a:2)
+      call s:Delgado(path, a:2)
+      return
+    endif
+
     if ((a:1 == '--pdb') || (a:1 == '-s'))
         call s:Pdb(path, a:1)
         return
@@ -817,6 +821,10 @@ function! s:ThisClass(verbose, ...)
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
+    if len(a:2)
+      call s:Delgado(path, a:2)
+      return
+    endif
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
         call s:Pdb(path, a:1)
@@ -835,6 +843,10 @@ function! s:ThisFile(verbose, ...)
     call s:ClearAll()
     call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
+    if len(a:2)
+      call s:Delgado(abspath, a:2)
+      return
+    endif
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
         call s:Pdb(abspath, a:1)
@@ -870,7 +882,7 @@ function! s:Delgado(path, arguments)
     let args_as_list = '[' . str_args . '\"' . a:path . '\"]'
     let json_arg = '{\"py.test\" :'. args_as_list . '}'
     let command = ":!" . "echo \"" . json_arg . "\"| nc -U /tmp/pytest.sock"
-    exe command
+    silent! exe command
 endfunction
 
 
