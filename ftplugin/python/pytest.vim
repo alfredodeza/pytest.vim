@@ -860,9 +860,7 @@ endfunction
 
 
 function! s:Delgado(path, arguments)
-    echom string(a:arguments)
     let args = a:arguments[1:]
-    echom string(args)
     let str_args = ""
     if len(args)
       for item in args
@@ -871,8 +869,7 @@ function! s:Delgado(path, arguments)
     endif
     let args_as_list = '[' . str_args . '\"' . a:path . '\"]'
     let json_arg = '{\"py.test\" :'. args_as_list . '}'
-    let command = ":!" . "echo \"" . json_arg . "\"| nc -U /tmp/socketname"
-    echom command
+    let command = ":!" . "echo \"" . json_arg . "\"| nc -U /tmp/pytest.sock"
     exe command
 endfunction
 
