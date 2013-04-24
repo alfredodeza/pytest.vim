@@ -844,7 +844,7 @@ function! s:ThisFile(verbose, ...)
     call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
     if len(a:2)
-      call s:Delgado(path, a:2, message)
+      call s:Delgado(abspath, a:2, message)
       return
     endif
 
