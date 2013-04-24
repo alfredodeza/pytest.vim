@@ -759,7 +759,7 @@ function! s:ThisMethod(verbose, ...)
     let message = "py.test ==> Running test for method " . m_name
     call s:Echo(message, 1)
     if len(a:2)
-      call s:Delgado(path, a:2)
+      call s:Delgado(path, a:2, message)
       return
     endif
     if ((a:1 == '--pdb') || (a:1 == '-s'))
@@ -790,7 +790,7 @@ function! s:ThisFunction(verbose, ...)
     let path = abspath . "::" . c_name
 
     if len(a:2)
-      call s:Delgado(path, a:2)
+      call s:Delgado(path, a:2, message)
       return
     endif
 
@@ -822,7 +822,7 @@ function! s:ThisClass(verbose, ...)
 
     let path = abspath . "::" . c_name
     if len(a:2)
-      call s:Delgado(path, a:2)
+      call s:Delgado(path, a:2, message)
       return
     endif
 
@@ -844,7 +844,7 @@ function! s:ThisFile(verbose, ...)
     call s:Echo("py.test ==> Running tests for entire file ", 1)
     let abspath     = s:CurrentPath()
     if len(a:2)
-      call s:Delgado(abspath, a:2)
+      call s:Delgado(path, a:2, message)
       return
     endif
 
@@ -871,7 +871,7 @@ function! s:Pdb(path, ...)
 endfunction
 
 
-function! s:Delgado(path, arguments)
+function! s:Delgado(path, arguments, message)
     let args = a:arguments[1:]
     let str_args = ""
     if len(args)
@@ -886,6 +886,9 @@ function! s:Delgado(path, arguments)
     " so that it echoes to :messages
     " echom command
     silent! exe command
+    if !has("gui_running")
+        call s:Echo(a:message, 1)
+    endif
 endfunction
 
 
