@@ -841,8 +841,9 @@ endfunction
 
 function! s:ThisFile(verbose, ...)
     call s:ClearAll()
-    call s:Echo("py.test ==> Running tests for entire file ", 1)
-    let abspath     = s:CurrentPath()
+    let message = "py.test ==> Running tests for entire file"
+    call s:Echo(message, 1)
+    let abspath = s:CurrentPath()
     if len(a:2)
       call s:Delgado(abspath, a:2, message)
       return
