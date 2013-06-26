@@ -35,7 +35,7 @@ All arguments are able to be tab-completed.
 
 Python Objects
 --------------
-For running tests the plugin provides 4 arguments with an optional one. 
+For running tests the plugin provides 4 arguments with an optional one.
 These arguments are::
 
     class
@@ -53,7 +53,7 @@ call this plugin like::
     :Pytest class
 
 Whenever a command is triggered a small message displays informing you that
-the plugin is running a certain action. In the above call, you would see 
+the plugin is running a certain action. In the above call, you would see
 something like this::
 
     Running tests for class TestMyClass
@@ -72,7 +72,7 @@ When tests are successful a green bar appears. If you have any number of fails
 you get a red bar with a line-by-line list of line numbers and errors.
 
 I strongly encourage a mapping for the above actions. For example, if you
-wanted leader (the leader key is '\' by default) mappings you would 
+wanted leader (the leader key is '\' by default) mappings you would
 probably do them like this::
 
     " Pytest
@@ -90,7 +90,7 @@ file. The list of jumping-to-error arguments are::
 
     first
     last
-    next 
+    next
     previous
     end
 
@@ -107,7 +107,7 @@ Output
 ------
 Finally, you can also display in a split scratch buffer either the last list
 of failed tests (with line numbers, errors and paths) or the last ``py.test``
-session (similar to what you would see in a terminal). The arguments that 
+session (similar to what you would see in a terminal). The arguments that
 you would need to provide for such actions are::
 
     session
@@ -132,14 +132,14 @@ will close the scratch buffer if it is open or will open it if its closed.
 
 PDB
 ---
-If you have ever needed to get into a `pdb` session and debug your code, you 
+If you have ever needed to get into a `pdb` session and debug your code, you
 already know that it is a horrible experience to be jumping between Vim and
 the terminal. **pytest.vim** now includes a way of calling it with 2 options
 that will let you drop to a shell (inside Vim!) and control your pdb session.
 
 **py.test pdb on fail**
 
-Use this option when you need to use the built-in pdb support from py.test 
+Use this option when you need to use the built-in pdb support from py.test
 (e.g. drop to pdb when a test fails).
 
 ::
@@ -152,7 +152,7 @@ supported (`class`, `method` , `function` and `file`).
 
 **py.test no capture**
 
-If you are placing `import pdb; pdb.set_trace()` somewhere in your code and 
+If you are placing `import pdb; pdb.set_trace()` somewhere in your code and
 you want to drop to pdb when that code gets executed, then you need to pass
 in the no-capture flag::
 
@@ -168,10 +168,10 @@ This plugin provides a way to have a better shell experience when running
 most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?script_id=2771)
 then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 
-`looponfail` 
+`looponfail`
 ---------------
 This is an *extra* option that will allow you to loop (run again) on fail.
-If the test fails, then this option will make Vim run the same test again as 
+If the test fails, then this option will make Vim run the same test again as
 soon as the file is written.
 
 Once the test passes, it will no longer re-run the tests again. This option is
@@ -188,7 +188,7 @@ the plugin you can do so by running the following command::
     :Pytest clear
 
 This is specifically useful when `looponfail` has been enabled and you want to
-stop its automatic behavior. Remember that `looponfail` will run every time you 
+stop its automatic behavior. Remember that `looponfail` will run every time you
 write the buffer and will keep doing so unless your test passes.
 
 Fast Next/Previous Error
@@ -201,6 +201,35 @@ Whenever you hit the bottom or the top of the list, you can loop around it!
 
 If you hit an error that displays not the previous window (e.g. your test file)
 then a message will state that it is skipping.
+
+``delgado`` support
+-------------------
+``delgado`` is a very small Python package that can execute commands in the
+terminal that are sent over a UDP socket. In some ocassions you might need to
+pass various different options to ``py.test`` that ``pytest.vim`` does not
+support (like distributed, coverage or highly verbose flags).
+
+``pytest.vim`` allows you to not run the actual command in Vim, but compound
+everything you need to run the test and send that information to ``delgado``,
+that should be up and running and listening for commands to run. In a separate
+terminal, ``delgado`` should be running like::
+
+    $ delgado pytest
+
+All the test objects (file, class, method, function) work for this, you just
+need to pass in ``delgado`` as an argument.
+
+An example call to a test method would look like this::
+
+    :Pytest method delgado
+
+Any extra options that ``py.test`` may accept can be appended to the command.
+This is how a very verbose distributed call would look like::
+
+    :Pytest method delgado -vv -n 4
+
+The results should be show in the terminal where ``delgado`` is running, not in
+Vim.
 
 
 License
