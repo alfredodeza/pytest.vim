@@ -204,10 +204,11 @@ then a message will state that it is skipping.
 
 ``delgado`` support
 -------------------
-``delgado`` is a very small Python package that can execute commands in the
-terminal that are sent over a UDP socket. In some ocassions you might need to
-pass various different options to ``py.test`` that ``pytest.vim`` does not
-support (like distributed, coverage or highly verbose flags).
+`delgado <https://github.com/alfredodeza/delgado#pytest>`_ is a very small
+Python package that can execute commands in the terminal that are sent over
+a UDP socket. In some ocassions you might need to pass various different
+options to ``py.test`` that ``pytest.vim`` does not support (like distributed,
+coverage or highly verbose flags).
 
 ``pytest.vim`` allows you to not run the actual command in Vim, but compound
 everything you need to run the test and send that information to ``delgado``,
