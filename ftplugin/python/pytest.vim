@@ -540,7 +540,10 @@ function! s:RunPyTest(path)
     let g:pytest_last_session   = out
 
     for w in split(out, '\n')
-        if w =~ '\v\s+(FAILURES)\s+'
+        if w =~ '\v\=\=\s+\d+ passed in'
+            call s:ParseSuccess(out)
+            return
+        elseif w =~ '\v\s+(FAILURES)\s+'
             call s:ParseFailures(out)
             return
         elseif w =~ '\v\s+(ERRORS)\s+'
