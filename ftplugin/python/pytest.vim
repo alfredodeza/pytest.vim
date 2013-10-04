@@ -324,6 +324,18 @@ function! s:CurrentPath()
     return cwd
 endfunction
 
+function! s:ProjectPath()
+    let expandstr = '%:p:h' 
+    while expand(expandstr) != '/'
+        let testpath = expand(expandstr)
+        if len(getfperm(testpath . '/tests')) > 0 || len(getfperm(testpath . '/tests.py')) > 0
+            return testpath
+        endif 
+        let expandstr .= ':h'
+    endwhile
+    return ""
+endfunction
+
 
 function! s:RunInSplitWindow(path)
     let cmd = "py.test --tb=short " . a:path
@@ -864,6 +876,30 @@ function! s:ThisFile(verbose, ...)
     endif
 endfunction
 
+function! s:ThisProject(verbose, ...)
+    call s:ClearAll()
+    let message = "py.test ==> Running tests for entire project"
+    call s:Echo(message, 1)
+    let abspath = s:ProjectPath()
+    call s:Echo(abspath,1)
+    if len(abspath) <= 0
+        call s:RedBar()
+        echo "There are no tests defined for this project"
+        return
+    endif
+
+    if ((a:1 == '--pdb') || (a:1 == '-s'))
+        call s:Pdb(abspath, a:1)
+        return
+    endif
+
+    if (a:verbose == 1)
+        call s:RunInSplitWindow(abspath)
+    else
+        call s:RunPyTest(abspath)
+    endif
+endfunction
+
 
 function! s:Pdb(path, ...)
     let pdb_command = "py.test " . a:1 . " " . a:path
@@ -966,6 +1002,16 @@ function! s:Proxy(action, ...)
         else
             call s:ThisFile(verbose, pdb, delgado)
         endif
+    elseif (a:action == "project" )
+        if looponfail ==1 
+            call s:LoopOnFail(a:action)
+            call s:ThisProject(verbose, pdb, delgado)
+        else
+            call s:ThisProject(verbose, pdb,delgado)
+        endif
+    elseif (a:action == "showprojecttests")
+        let projecttests = s:ProjectPath()
+        call s:Echo(projecttests)
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
     elseif (a:action == "next")

@@ -42,10 +42,11 @@ These arguments are::
     method
     function
     file
+    project
 
 
 As you may expect, those will focus on the tests for the current class, method,
-function or the whole file.
+function, the file or project.
 
 If you are in a class and want to run all the tests for that class, you would
 call this plugin like::
