@@ -325,15 +325,18 @@ function! s:CurrentPath()
 endfunction
 
 function! s:ProjectPath()
-    let expandstr = '%:p:h' 
-    while expand(expandstr) != '/'
-        let testpath = expand(expandstr)
-        if len(getfperm(testpath . '/tests')) > 0 || len(getfperm(testpath . '/tests.py')) > 0
-            return testpath
-        endif 
-        let expandstr .= ':h'
-    endwhile
-    return ""
+    let projecttestdir = finddir('tests','.;')
+    let projecttestfile = findfile('tests.py','.;')
+
+    if(len(projecttestdir) != 0)
+        let path = fnamemodify(projecttestdir, ':p:h')
+    elseif(len(projecttestfile) != 0)
+        let path = fnamemodify(projecttestfile, ':p')
+    else 
+        let path = ''
+    endif
+
+    return path
 endfunction
 
 
@@ -881,7 +884,6 @@ function! s:ThisProject(verbose, ...)
     let message = "py.test ==> Running tests for entire project"
     call s:Echo(message, 1)
     let abspath = s:ProjectPath()
-    call s:Echo(abspath,1)
     if len(abspath) <= 0
         call s:RedBar()
         echo "There are no tests defined for this project"
