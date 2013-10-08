@@ -941,7 +941,7 @@ endfunction
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
     let result_order = "first\nlast\nnext\nprevious\n"
-    let test_objects = "class\nmethod\nfile\n"
+    let test_objects = "class\nmethod\nfile\nproject\nprojecttestwd\n"
     let optional     = "verbose\nlooponfail\nclear\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
@@ -1011,7 +1011,7 @@ function! s:Proxy(action, ...)
         else
             call s:ThisProject(verbose, pdb,delgado)
         endif
-    elseif (a:action == "showprojecttests")
+    elseif (a:action == "projecttestwd")
         let projecttests = s:ProjectPath()
         call s:Echo(projecttests)
     elseif (a:action == "fails")
