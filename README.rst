@@ -81,6 +81,26 @@ probably do them like this::
     nmap <silent><Leader>c <Esc>:Pytest class<CR>
     nmap <silent><Leader>m <Esc>:Pytest method<CR>
 
+If you are working on a project, this plugin provides a way to run tests from
+anywhere within the project tree like this::
+
+    " Tests are in /path/to/project/tests/
+    " Working on   /path/to/project/module/file.py
+    :Pytest project
+
+This would run all of the project tests (in /path/to/project/tests/) related
+to the active project. This works with a directory called "tests" or a file
+called "tests.py". It should be noted that this plugin searches upward through
+the directory tree, taking the first entry it finds. For example::
+
+    " Working on /home/project/file.py
+    /home/tests/          " This set of tests will not be run
+    /home/project/tests/  " This set of tests will be run
+
+It is easy to check which set of tests will be run (the project test working
+directory)::
+
+    :Pytest projecttestwd
 
 Errors and Fails
 ----------------
