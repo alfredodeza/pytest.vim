@@ -324,6 +324,21 @@ function! s:CurrentPath()
     return cwd
 endfunction
 
+function! s:ProjectPath()
+    let projecttestdir = finddir('tests','.;')
+    let projecttestfile = findfile('tests.py','.;')
+
+    if(len(projecttestdir) != 0)
+        let path = fnamemodify(projecttestdir, ':p:h')
+    elseif(len(projecttestfile) != 0)
+        let path = fnamemodify(projecttestfile, ':p')
+    else 
+        let path = ''
+    endif
+
+    return path
+endfunction
+
 
 function! s:RunInSplitWindow(path)
     let cmd = "py.test --tb=short " . a:path
@@ -864,6 +879,29 @@ function! s:ThisFile(verbose, ...)
     endif
 endfunction
 
+function! s:ThisProject(verbose, ...)
+    call s:ClearAll()
+    let message = "py.test ==> Running tests for entire project"
+    call s:Echo(message, 1)
+    let abspath = s:ProjectPath()
+    if len(abspath) <= 0
+        call s:RedBar()
+        echo "There are no tests defined for this project"
+        return
+    endif
+
+    if ((a:1 == '--pdb') || (a:1 == '-s'))
+        call s:Pdb(abspath, a:1)
+        return
+    endif
+
+    if (a:verbose == 1)
+        call s:RunInSplitWindow(abspath)
+    else
+        call s:RunPyTest(abspath)
+    endif
+endfunction
+
 
 function! s:Pdb(path, ...)
     let pdb_command = "py.test " . a:1 . " " . a:path
@@ -903,7 +941,7 @@ endfunction
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
     let result_order = "first\nlast\nnext\nprevious\n"
-    let test_objects = "class\nmethod\nfile\n"
+    let test_objects = "class\nmethod\nfile\nproject\nprojecttestwd\n"
     let optional     = "verbose\nlooponfail\nclear\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
@@ -966,6 +1004,16 @@ function! s:Proxy(action, ...)
         else
             call s:ThisFile(verbose, pdb, delgado)
         endif
+    elseif (a:action == "project" )
+        if looponfail ==1 
+            call s:LoopOnFail(a:action)
+            call s:ThisProject(verbose, pdb, delgado)
+        else
+            call s:ThisProject(verbose, pdb,delgado)
+        endif
+    elseif (a:action == "projecttestwd")
+        let projecttests = s:ProjectPath()
+        call s:Echo(projecttests)
     elseif (a:action == "fails")
         call s:ToggleFailWindow()
     elseif (a:action == "next")
