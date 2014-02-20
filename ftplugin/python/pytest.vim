@@ -271,8 +271,9 @@ function! s:FindPythonObject(obj)
         "
         " Very naive, but if the indent is less than or equal to four
         " keep on going because we assume you are nesting.
+        " Do not count lines that are comments though.
         "
-        if indent(line('.')) <= 4
+        if (indent(line('.')) <= 4) && !(getline(line('.')) =~ '\v^\s*#(.*)')
             return 1
         endif
     endwhile
@@ -332,7 +333,7 @@ function! s:ProjectPath()
         let path = fnamemodify(projecttestdir, ':p:h')
     elseif(len(projecttestfile) != 0)
         let path = fnamemodify(projecttestfile, ':p')
-    else 
+    else
         let path = ''
     endif
 
@@ -1005,7 +1006,7 @@ function! s:Proxy(action, ...)
             call s:ThisFile(verbose, pdb, delgado)
         endif
     elseif (a:action == "project" )
-        if looponfail ==1 
+        if looponfail ==1
             call s:LoopOnFail(a:action)
             call s:ThisProject(verbose, pdb, delgado)
         else
