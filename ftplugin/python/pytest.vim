@@ -942,7 +942,7 @@ endfunction
 
 function! s:Completion(ArgLead, CmdLine, CursorPos)
     let result_order = "first\nlast\nnext\nprevious\n"
-    let test_objects = "class\nmethod\nfile\nproject\nprojecttestwd\n"
+    let test_objects = "class\nmethod\nfunction\nfile\nproject\nprojecttestwd\n"
     let optional     = "verbose\nlooponfail\nclear\n"
     let reports      = "fails\nerror\nsession\nend\n"
     let pyversion    = "version\n"
