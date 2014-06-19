@@ -719,7 +719,7 @@ function! s:ParseSuccess(stdout) abort
     " this would insert that into the resulting GreenBar but only the
     " interesting portion
     for w in split(a:stdout, '\n')
-        if w =~ '\v^\={14,}\s+\d+\s+passed\s+in\s+'
+        if w =~ '\v^\={14,}\s+\d+\s+passed'
             let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
         endif
     endfor
