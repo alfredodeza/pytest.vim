@@ -436,6 +436,7 @@ function! s:ShowFails(...)
         let error_number = err + 1
         call setline(error_number, message)
     endfor
+
 	silent! execute 'resize ' . line('$')
     autocmd! BufEnter LastSession.pytest call s:CloseIfLastWindow()
     nnoremap <silent> <buffer> q       :call <sid>ClearAll(1)<CR>
@@ -568,6 +569,17 @@ function! s:RunPyTest(path)
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
             call s:RedBar()
             echo "py.test had an Error, see :Pytest session for more information"
+            if exists('$VIRTUAL_ENV')
+              if !executable($VIRTUAL_ENV . "/bin/py.test")
+                echo repeat("*", 80)
+                echo " Detected an activated virtualenv but py.test was not found"
+                echo " Make sure py.test is installed in the current virtualenv"
+                echo " and present at:"
+                echo " "
+                echo "    " . $VIRTUAL_ENV . "/bin/py.test"
+                echo " "
+              endif
+            endif
             return
         elseif w =~ '\v^(.*)\s*INTERNALERROR'
             call s:RedBar()
