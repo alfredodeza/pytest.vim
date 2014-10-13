@@ -608,23 +608,9 @@ function! s:ParseFailures(stdout)
     let error['line'] = ""
     let error['path'] = ""
     let error['exception'] = ""
+
     " Loop through the output and build the error dict
     for w in split(a:stdout, '\n')
-        if ((error.line != "") && (error.path != "") && (error.exception != ""))
-            try
-                let end_file_path = error['file_path']
-            catch /^Vim\%((\a\+)\)\=:E/
-                let error.file_path = error.path
-                let error.file_line = error.line
-            endtry
-            let error_number = error_number + 1
-            let errors[error_number] = error
-            let error = {}
-            let error['line'] = ""
-            let error['path'] = ""
-            let error['exception'] = ""
-        endif
-
         if w =~ '\v\s+(FAILURES)\s+'
             let failed = 1
         elseif w =~ '\v^(.*)\.py:(\d+):'
@@ -634,10 +620,15 @@ function! s:ParseFailures(stdout)
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.path = file_path[1]
             elseif w !~ file_regex
+                " Because we have missed out on actual line and path
+                " add them here to both file_line and line and file_path and
+                " path so that reporting works
                 let match_result = matchlist(w, '\v:(\d+):')
                 let error.file_line = match_result[1]
+                let error.line = match_result[1]
                 let file_path = matchlist(w, '\v(.*.py):')
                 let error.file_path = file_path[1]
+                let error.path = file_path[1]
             endif
         elseif w =~  '\v^E\s+\w+(.*)\s+'
             let split_error = split(w, "E ")
@@ -652,6 +643,23 @@ function! s:ParseFailures(stdout)
             endif
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
             let pytest_error = w
+        endif
+
+        " At the end of the loop make sure we append the failure parsed to the
+        " errors dictionary
+        if ((error.line != "") && (error.path != "") && (error.exception != ""))
+            try
+                let end_file_path = error['file_path']
+            catch /^Vim\%((\a\+)\)\=:E/
+                let error.file_path = error.path
+                let error.file_line = error.line
+            endtry
+            let error_number = error_number + 1
+            let errors[error_number] = error
+            let error = {}
+            let error['line'] = ""
+            let error['path'] = ""
+            let error['exception'] = ""
         endif
     endfor
 
