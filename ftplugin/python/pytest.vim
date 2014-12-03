@@ -342,7 +342,7 @@ endfunction
 
 
 function! s:RunInSplitWindow(path)
-    let cmd = "py.test --tb=short " . a:path
+    let cmd = "py.test --tb=short --color=no " . a:path
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(cmd, ['split', 'resize 20'], 0)
     else
@@ -548,7 +548,7 @@ endfunction!
 
 function! s:RunPyTest(path)
     let g:pytest_last_session = ""
-    let cmd = "py.test --tb=short " . a:path
+    let cmd = "py.test --tb=short --color=no " . a:path
     let out = system(cmd)
 
     " Pointers and default variables
