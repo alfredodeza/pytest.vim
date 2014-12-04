@@ -551,6 +551,11 @@ function! s:RunPyTest(path)
     let cmd = "py.test --tb=short " . a:path
     let out = system(cmd)
 
+    " if py.test insists in giving us color, sanitize the output
+    " note that ^[ is really:
+    " Ctrl-V Ctrl-[
+    let out = substitute(out, '[\d\+m', '', 'g')
+
     " Pointers and default variables
     let g:pytest_session_errors = {}
     let g:pytest_session_error  = 0
