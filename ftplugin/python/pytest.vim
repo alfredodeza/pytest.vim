@@ -295,12 +295,10 @@ endfunction
 
 
 function! s:NameOfCurrentMethod()
-    let save_cursor = getpos(".")
     normal! $<cr>
     let find_object = s:FindPythonObject('method')
     if (find_object)
         let line = getline('.')
-        call setpos('.', save_cursor)
         let match_result = matchlist(line, ' *def \+\(\w\+\)')
         return match_result[1]
     endif
@@ -546,9 +544,21 @@ function! s:ResetAll()
 endfunction!
 
 
-function! s:RunPyTest(path)
+function! s:RunPyTest(path, ...)
+    if (a:0 > 0)
+      let parametrized = a:1
+    else
+      let parametrized = 0
+    endif
+
     let g:pytest_last_session = ""
-    let cmd = "py.test --tb=short " . a:path
+
+    if len(parametrized)
+        let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
+    else
+        let cmd = "py.test --tb=short " . a:path
+    endif
+
     let out = system(cmd)
 
     " if py.test insists in giving us color, sanitize the output
@@ -787,6 +797,8 @@ function! s:ThisMethod(verbose, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let m_name  = s:NameOfCurrentMethod()
+    let is_parametrized = s:HasPythonDecorator(line('.'))
+
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
     if (strlen(m_name) == 1)
@@ -799,8 +811,14 @@ function! s:ThisMethod(verbose, ...)
         return
     endif
 
-    let path =  abspath . "::" . c_name . "::" . m_name
-    let message = "py.test ==> Running test for method " . m_name
+    if is_parametrized
+        let path =  abspath . "::" . c_name
+        let message = "py.test ==> Running test for parametrized method " . m_name
+    else
+        let path =  abspath . "::" . c_name . "::" . m_name
+        let message = "py.test ==> Running test for method " . m_name
+    endif
+
     call s:Echo(message, 1)
     if len(a:2)
       call s:Delgado(path, a:2, message)
@@ -813,8 +831,35 @@ function! s:ThisMethod(verbose, ...)
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
-       call s:RunPyTest(path)
+       call s:RunPyTest(path, m_name)
     endif
+endfunction
+
+
+function! s:HasPythonDecorator(line)
+    " Get to the previous line where the decorator lives
+    let line = a:line -1
+    " if it is whitespace or there is nothing there, return
+    if (getline(line) =~ '^\\s*\\S')
+        return 0
+    endif
+
+    " now keep searching back as long as there aren't any other
+    " empty lines
+    while (getline(line) !~ '^\\s*\\S')
+        if (getline(line) =~ '\v^(.*\@[a-zA-Z])')
+            return 1
+        elseif (getline(line) =~ '\v^\s*(.*def)\s+(\w+)\s*\(\s*')
+            " so we found either a function or a class, therefore, no way we have
+            " a decorator
+            return 0
+        elseif (line < 1)
+            " we went all the way to the top of the file, no need to keep going
+            return 0
+        endif
+        let line = line - 1
+    endwhile
+
 endfunction
 
 
