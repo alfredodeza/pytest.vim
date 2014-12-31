@@ -306,12 +306,10 @@ endfunction
 
 
 function! s:NameOfCurrentFunction()
-    let save_cursor = getpos(".")
     normal! $<cr>
     let find_object = s:FindPythonObject('function')
     if (find_object)
         let line = getline('.')
-        call setpos('.', save_cursor)
         let match_result = matchlist(line, ' *def \+\(\w\+\)')
         return match_result[1]
     endif
@@ -867,6 +865,7 @@ function! s:ThisFunction(verbose, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentFunction()
+    let is_parametrized = s:HasPythonDecorator(line('.'))
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
         call setpos('.', save_cursor)
@@ -876,7 +875,11 @@ function! s:ThisFunction(verbose, ...)
     let message  = "py.test ==> Running tests for function " . c_name
     call s:Echo(message, 1)
 
-    let path = abspath . "::" . c_name
+    if is_parametrized
+        let path = abspath
+    else
+        let path = abspath . "::" . c_name
+    endif
 
     if len(a:2)
       call s:Delgado(path, a:2, message)
@@ -891,7 +894,7 @@ function! s:ThisFunction(verbose, ...)
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
-        call s:RunPyTest(path)
+        call s:RunPyTest(path, c_name)
     endif
 endfunction
 
