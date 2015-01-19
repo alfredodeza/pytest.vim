@@ -551,7 +551,7 @@ function! s:RunPyTest(path, ...)
 
     let g:pytest_last_session = ""
 
-    if len(parametrized)
+    if (len(parametrized) && parametrized != "0")
         let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
     else
         let cmd = "py.test --tb=short " . a:path
