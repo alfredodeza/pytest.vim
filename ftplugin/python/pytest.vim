@@ -259,10 +259,13 @@ function! s:FindPythonObject(obj)
 
     if (a:obj == "class")
         let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*'
+        let max_indent_allowed = orig_indent - 4
     elseif (a:obj == "method")
         let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(self[^)]*)'
+        let max_indent_allowed = orig_indent
     else
         let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(.*self)@!'
+        let max_indent_allowed = orig_indent
     endif
 
     let flag = "Wb"
@@ -274,7 +277,9 @@ function! s:FindPythonObject(obj)
         " Do not count lines that are comments though.
         "
         if (indent(line('.')) <= 4) && !(getline(line('.')) =~ '\v^\s*#(.*)')
+          if !(indent(line('.')) >= max_indent_allowed)
             return 1
+          endif
         endif
     endwhile
 
@@ -551,7 +556,7 @@ function! s:RunPyTest(path, ...)
 
     let g:pytest_last_session = ""
 
-    if len(parametrized)
+    if (len(parametrized) && parametrized != "0")
         let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
     else
         let cmd = "py.test --tb=short " . a:path
@@ -808,6 +813,10 @@ function! s:ThisMethod(verbose, ...)
         call s:Echo("Unable to find a matching class for testing")
         return
     endif
+
+    " If we didn't error, still, save the cursor so we are back
+    " to the original position
+    call setpos('.', save_cursor)
 
     if is_parametrized
         let path =  abspath . "::" . c_name
