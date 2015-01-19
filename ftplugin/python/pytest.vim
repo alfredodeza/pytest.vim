@@ -257,12 +257,13 @@ function! s:FindPythonObject(obj)
     let orig_col    = col('.')
     let orig_indent = indent(orig_line)
 
+
     if (a:obj == "class")
         let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*'
-        let max_indent_allowed = orig_indent - 4
+        let max_indent_allowed = 0
     elseif (a:obj == "method")
         let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(self[^)]*)'
-        let max_indent_allowed = orig_indent
+        let max_indent_allowed = 4
     else
         let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(.*self)@!'
         let max_indent_allowed = orig_indent
@@ -277,7 +278,7 @@ function! s:FindPythonObject(obj)
         " Do not count lines that are comments though.
         "
         if (indent(line('.')) <= 4) && !(getline(line('.')) =~ '\v^\s*#(.*)')
-          if !(indent(line('.')) >= max_indent_allowed)
+          if (indent(line('.')) <= max_indent_allowed)
             return 1
           endif
         endif
@@ -820,9 +821,11 @@ function! s:ThisMethod(verbose, ...)
 
     if is_parametrized
         let path =  abspath . "::" . c_name
+        let parametrized_flag = m_name
         let message = "py.test ==> Running test for parametrized method " . m_name
     else
         let path =  abspath . "::" . c_name . "::" . m_name
+        let parametrized_flag = "0"
         let message = "py.test ==> Running test for method " . m_name
     endif
 
@@ -838,7 +841,7 @@ function! s:ThisMethod(verbose, ...)
     if (a:verbose == 1)
         call s:RunInSplitWindow(path)
     else
-       call s:RunPyTest(path, m_name)
+       call s:RunPyTest(path, parametrized_flag)
     endif
 endfunction
 
