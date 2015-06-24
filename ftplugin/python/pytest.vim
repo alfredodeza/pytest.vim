@@ -433,7 +433,7 @@ function! s:ShowFails(...)
         if (path_error == ends)
             let message = printf('Line: %-*u ==>> %-*s %s ==>> %s', 6, line_number, 14, exception, error, path_error)
         else
-            let message = printf('Line: %-*u ==>> %-*s ==>> %s', 6, line_number, 24, exception, ends)
+            let message = printf('Line: %-*u ==>> %-*s %s ==>> %s', 6, line_number, 24, exception, error, ends)
         endif
         let error_number = err + 1
         call setline(error_number, message)
