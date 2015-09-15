@@ -344,7 +344,7 @@ endfunction
 
 
 function! s:RunInSplitWindow(path)
-    let cmd = "py.test --tb=short " . a:path
+    let cmd = "py.test --doctest-modules --tb=short " . a:path
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(cmd, ['split', 'resize 20'], 0)
     else
@@ -558,9 +558,9 @@ function! s:RunPyTest(path, ...)
     let g:pytest_last_session = ""
 
     if (len(parametrized) && parametrized != "0")
-        let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
+        let cmd = "py.test --doctest-modules -k " . parametrized . " --tb=short " . a:path
     else
-        let cmd = "py.test --tb=short " . a:path
+        let cmd = "py.test --doctest-modules --tb=short " . a:path
     endif
 
     let out = system(cmd)
@@ -990,7 +990,7 @@ endfunction
 
 
 function! s:Pdb(path, ...)
-    let pdb_command = "py.test " . a:1 . " " . a:path
+    let pdb_command = "py.test --doctest-modules " . a:1 . " " . a:path
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(pdb_command, ['split', 'resize 20'], 0)
     else
