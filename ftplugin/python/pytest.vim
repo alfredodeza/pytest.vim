@@ -553,7 +553,7 @@ function! s:ResetAll()
 endfunction!
 
 
-function! s:RunPyTest(path, doctest ...)
+function! s:RunPyTest(path, doctest, ...)
     if (a:0 > 0)
       let parametrized = a:1
     else
