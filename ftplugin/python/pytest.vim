@@ -978,7 +978,7 @@ function! s:ThisFile(verbose, doctest, ...)
     endif
 endfunction
 
-function! s:ThisProject(verbose, ...)
+function! s:ThisProject(verbose, doctest, ...)
     call s:ClearAll()
     let message = "py.test ==> Running tests for entire project"
     call s:Echo(message, 1)
@@ -995,9 +995,9 @@ function! s:ThisProject(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(abspath)
+        call s:RunInSplitWindow(abspath, a:doctest)
     else
-        call s:RunPyTest(abspath)
+        call s:RunPyTest(abspath, a:doctest)
     endif
 endfunction
 
