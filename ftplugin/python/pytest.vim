@@ -343,8 +343,13 @@ function! s:ProjectPath()
 endfunction
 
 
-function! s:RunInSplitWindow(path)
-    let cmd = "py.test --doctest-modules --tb=short " . a:path
+function! s:RunInSplitWindow(path, doctest)
+    let cmd = "py.test"
+    if (a:doctest == 'True')
+        let cmd = cmd . ' --doctest-modules'
+    endif
+    let cmd = cmd . " --tb=short " . a:path
+
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(cmd, ['split', 'resize 20'], 0)
     else
@@ -548,7 +553,7 @@ function! s:ResetAll()
 endfunction!
 
 
-function! s:RunPyTest(path, ...)
+function! s:RunPyTest(path, doctest ...)
     if (a:0 > 0)
       let parametrized = a:1
     else
@@ -557,10 +562,14 @@ function! s:RunPyTest(path, ...)
 
     let g:pytest_last_session = ""
 
+    let cmd = 'py.test'
+    if (a:doctest == 'True')
+        let cmd = cmd . ' --doctest-modules'
+
     if (len(parametrized) && parametrized != "0")
-        let cmd = "py.test --doctest-modules -k " . parametrized . " --tb=short " . a:path
+        let cmd = cmd . " -k " . parametrized . " --tb=short " . a:path
     else
-        let cmd = "py.test --doctest-modules --tb=short " . a:path
+        let cmd = cmd . " --tb=short " . a:path
     endif
 
     let out = system(cmd)
@@ -873,10 +882,14 @@ function! s:HasPythonDecorator(line)
 endfunction
 
 
-function! s:ThisFunction(verbose, ...)
+function! s:ThisFunction(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentFunction()
+    if (a:doctest == 'True')
+        let c_name = substitute(substitute(@%, '.py', '.', ''), '/', '.', 'g') . c_name
+    endif
+
     let is_parametrized = s:HasPythonDecorator(line('.'))
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
@@ -904,9 +917,9 @@ function! s:ThisFunction(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(path, a:doctest)
     else
-        call s:RunPyTest(path, c_name)
+        call s:RunPyTest(path, c_name, a:doctest)
     endif
 endfunction
 
@@ -1047,8 +1060,12 @@ function! s:Proxy(action, ...)
     let pdb     = 'False'
     let looponfail = 0
     let delgado = []
+    let doctest = 'False'
 
     if (a:0 > 0)
+        if ((a:1 == 'doctest') || ((a:0 > 1) && (a:2 == 'doctest')))
+            let doctest = 'True'
+        endif
         if (a:1 == 'verbose')
             let verbose = 1
         elseif (a:1 == '--pdb')
@@ -1065,37 +1082,37 @@ function! s:Proxy(action, ...)
     if (a:action == "class")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisClass(verbose, pdb, delgado)
+            call s:ThisClass(verbose, doctest, pdb, delgado)
         else
-            call s:ThisClass(verbose, pdb, delgado)
+            call s:ThisClass(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "method")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisMethod(verbose, pdb, delgado)
+            call s:ThisMethod(verbose, doctest, pdb, delgado)
         else
-            call s:ThisMethod(verbose, pdb, delgado)
+            call s:ThisMethod(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "function")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisFunction(verbose, pdb, delgado)
+            call s:ThisFunction(verbose, doctest, pdb, delgado)
         else
-            call s:ThisFunction(verbose, pdb, delgado)
+            call s:ThisFunction(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "file")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisFile(verbose, pdb, delgado)
+            call s:ThisFile(verbose, doctest, pdb, delgado)
         else
-            call s:ThisFile(verbose, pdb, delgado)
+            call s:ThisFile(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "project" )
         if looponfail ==1
             call s:LoopOnFail(a:action)
-            call s:ThisProject(verbose, pdb, delgado)
+            call s:ThisProject(verbose, doctest, pdb, delgado)
         else
-            call s:ThisProject(verbose, pdb,delgado)
+            call s:ThisProject(verbose, doctest, pdb,delgado)
         endif
     elseif (a:action == "projecttestwd")
         let projecttests = s:ProjectPath()
