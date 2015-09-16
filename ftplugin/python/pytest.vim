@@ -935,7 +935,7 @@ function! s:ThisFunction(verbose, doctest, ...)
     if (a:verbose == 1)
         call s:RunInSplitWindow(path, a:doctest)
     else
-        call s:RunPyTest(path, c_name, a:doctest)
+        call s:RunPyTest(path, a:doctest, c_name)
     endif
 endfunction
 
