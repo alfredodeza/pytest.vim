@@ -815,14 +815,20 @@ function! s:GreenBar()
 endfunction
 
 
-function! s:ThisMethod(verbose, ...)
+function! s:ThisMethod(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
+    let sep = '::'
     let m_name  = s:NameOfCurrentMethod()
     let is_parametrized = s:HasPythonDecorator(line('.'))
 
     let c_name  = s:NameOfCurrentClass()
+    if (a:doctest == 'True')
+        let c_name = s:PythonPathToModule() . c_name
+        let sep = '.'
+    endif
     let abspath = s:CurrentPath()
+
     if (strlen(m_name) == 1)
         call setpos('.', save_cursor)
         call s:Echo("Unable to find a matching method for testing")
@@ -842,7 +848,7 @@ function! s:ThisMethod(verbose, ...)
         let parametrized_flag = m_name
         let message = "py.test ==> Running test for parametrized method " . m_name
     else
-        let path =  abspath . "::" . c_name . "::" . m_name
+        let path =  abspath . "::" . c_name . sep . m_name
         let parametrized_flag = "0"
         let message = "py.test ==> Running test for method " . m_name
     endif
@@ -857,9 +863,9 @@ function! s:ThisMethod(verbose, ...)
         return
     endif
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(path, a:doctest)
     else
-       call s:RunPyTest(path, parametrized_flag)
+       call s:RunPyTest(path, a:doctest, parametrized_flag)
     endif
 endfunction
 
