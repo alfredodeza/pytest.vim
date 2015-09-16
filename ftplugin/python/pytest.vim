@@ -574,6 +574,7 @@ function! s:RunPyTest(path, doctest, ...)
     let cmd = 'py.test'
     if (a:doctest == 'True')
         let cmd = cmd . ' --doctest-modules'
+    endif
 
     if (len(parametrized) && parametrized != "0")
         let cmd = cmd . " -k " . parametrized . " --tb=short " . a:path
