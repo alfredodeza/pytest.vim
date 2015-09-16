@@ -300,6 +300,15 @@ function! s:NameOfCurrentClass()
 endfunction
 
 
+function! s:PythonPathToModule()
+    let path = @%
+    let path = substitute(path, '.__init__.py', '.', 'g')
+    let path = substitute(path, '.py', '.', 'g')
+    let path = substitute(path, '/', '.', 'g')
+    return path
+endfunction
+
+
 function! s:NameOfCurrentMethod()
     normal! $<cr>
     let find_object = s:FindPythonObject('method')
@@ -887,7 +896,7 @@ function! s:ThisFunction(verbose, doctest, ...)
     call s:ClearAll()
     let c_name      = s:NameOfCurrentFunction()
     if (a:doctest == 'True')
-        let c_name = substitute(substitute(@%, '.py', '.', ''), '/', '.', 'g') . c_name
+        let c_name = s:PythonPathToModule() . c_name
     endif
 
     let is_parametrized = s:HasPythonDecorator(line('.'))
@@ -928,6 +937,9 @@ function! s:ThisClass(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentClass()
+    if (a:doctest == 'True')
+        let c_name = s:PythonPathToModule() . c_name
+    endif
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
         call setpos('.', save_cursor)
@@ -949,9 +961,9 @@ function! s:ThisClass(verbose, doctest, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(path, a:doctest)
     else
-        call s:RunPyTest(path)
+        call s:RunPyTest(path, a:doctest)
     endif
 endfunction
 
