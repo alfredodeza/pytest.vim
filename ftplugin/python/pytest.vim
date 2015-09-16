@@ -924,7 +924,7 @@ function! s:ThisFunction(verbose, doctest, ...)
 endfunction
 
 
-function! s:ThisClass(verbose, ...)
+function! s:ThisClass(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentClass()
@@ -956,7 +956,7 @@ function! s:ThisClass(verbose, ...)
 endfunction
 
 
-function! s:ThisFile(verbose, ...)
+function! s:ThisFile(verbose, doctest, ...)
     call s:ClearAll()
     let message = "py.test ==> Running tests for entire file"
     call s:Echo(message, 1)
@@ -972,9 +972,9 @@ function! s:ThisFile(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(abspath)
+        call s:RunInSplitWindow(abspath, a:doctest)
     else
-        call s:RunPyTest(abspath)
+        call s:RunPyTest(abspath, a:doctest)
     endif
 endfunction
 
