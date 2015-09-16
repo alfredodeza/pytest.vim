@@ -300,6 +300,15 @@ function! s:NameOfCurrentClass()
 endfunction
 
 
+function! s:PythonPathToModule()
+    let path = @%
+    let path = substitute(path, '.__init__.py', '.', 'g')
+    let path = substitute(path, '.py', '.', 'g')
+    let path = substitute(path, '/', '.', 'g')
+    return path
+endfunction
+
+
 function! s:NameOfCurrentMethod()
     normal! $<cr>
     let find_object = s:FindPythonObject('method')
@@ -343,8 +352,13 @@ function! s:ProjectPath()
 endfunction
 
 
-function! s:RunInSplitWindow(path)
-    let cmd = "py.test --tb=short " . a:path
+function! s:RunInSplitWindow(path, doctest)
+    let cmd = "py.test"
+    if (a:doctest == 'True')
+        let cmd = cmd . ' --doctest-modules'
+    endif
+    let cmd = cmd . " --tb=short " . a:path
+
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(cmd, ['split', 'resize 20'], 0)
     else
@@ -548,7 +562,7 @@ function! s:ResetAll()
 endfunction!
 
 
-function! s:RunPyTest(path, ...)
+function! s:RunPyTest(path, doctest, ...)
     if (a:0 > 0)
       let parametrized = a:1
     else
@@ -557,10 +571,15 @@ function! s:RunPyTest(path, ...)
 
     let g:pytest_last_session = ""
 
+    let cmd = 'py.test'
+    if (a:doctest == 'True')
+        let cmd = cmd . ' --doctest-modules'
+    endif
+
     if (len(parametrized) && parametrized != "0")
-        let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
+        let cmd = cmd . " -k " . parametrized . " --tb=short " . a:path
     else
-        let cmd = "py.test --tb=short " . a:path
+        let cmd = cmd . " --tb=short " . a:path
     endif
 
     let out = system(cmd)
@@ -797,14 +816,20 @@ function! s:GreenBar()
 endfunction
 
 
-function! s:ThisMethod(verbose, ...)
+function! s:ThisMethod(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
+    let sep = '::'
     let m_name  = s:NameOfCurrentMethod()
     let is_parametrized = s:HasPythonDecorator(line('.'))
 
     let c_name  = s:NameOfCurrentClass()
+    if (a:doctest == 'True')
+        let c_name = s:PythonPathToModule() . c_name
+        let sep = '.'
+    endif
     let abspath = s:CurrentPath()
+
     if (strlen(m_name) == 1)
         call setpos('.', save_cursor)
         call s:Echo("Unable to find a matching method for testing")
@@ -824,7 +849,7 @@ function! s:ThisMethod(verbose, ...)
         let parametrized_flag = m_name
         let message = "py.test ==> Running test for parametrized method " . m_name
     else
-        let path =  abspath . "::" . c_name . "::" . m_name
+        let path =  abspath . "::" . c_name . sep . m_name
         let parametrized_flag = "0"
         let message = "py.test ==> Running test for method " . m_name
     endif
@@ -839,9 +864,9 @@ function! s:ThisMethod(verbose, ...)
         return
     endif
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(path, a:doctest)
     else
-       call s:RunPyTest(path, parametrized_flag)
+       call s:RunPyTest(path, a:doctest, parametrized_flag)
     endif
 endfunction
 
@@ -873,10 +898,14 @@ function! s:HasPythonDecorator(line)
 endfunction
 
 
-function! s:ThisFunction(verbose, ...)
+function! s:ThisFunction(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentFunction()
+    if (a:doctest == 'True')
+        let c_name = s:PythonPathToModule() . c_name
+    endif
+
     let is_parametrized = s:HasPythonDecorator(line('.'))
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
@@ -904,17 +933,20 @@ function! s:ThisFunction(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(path, a:doctest)
     else
-        call s:RunPyTest(path, c_name)
+        call s:RunPyTest(path, a:doctest, c_name)
     endif
 endfunction
 
 
-function! s:ThisClass(verbose, ...)
+function! s:ThisClass(verbose, doctest, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentClass()
+    if (a:doctest == 'True')
+        let c_name = s:PythonPathToModule() . c_name
+    endif
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
         call setpos('.', save_cursor)
@@ -936,14 +968,14 @@ function! s:ThisClass(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(path)
+        call s:RunInSplitWindow(path, a:doctest)
     else
-        call s:RunPyTest(path)
+        call s:RunPyTest(path, a:doctest)
     endif
 endfunction
 
 
-function! s:ThisFile(verbose, ...)
+function! s:ThisFile(verbose, doctest, ...)
     call s:ClearAll()
     let message = "py.test ==> Running tests for entire file"
     call s:Echo(message, 1)
@@ -959,13 +991,13 @@ function! s:ThisFile(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(abspath)
+        call s:RunInSplitWindow(abspath, a:doctest)
     else
-        call s:RunPyTest(abspath)
+        call s:RunPyTest(abspath, a:doctest)
     endif
 endfunction
 
-function! s:ThisProject(verbose, ...)
+function! s:ThisProject(verbose, doctest, ...)
     call s:ClearAll()
     let message = "py.test ==> Running tests for entire project"
     call s:Echo(message, 1)
@@ -982,15 +1014,15 @@ function! s:ThisProject(verbose, ...)
     endif
 
     if (a:verbose == 1)
-        call s:RunInSplitWindow(abspath)
+        call s:RunInSplitWindow(abspath, a:doctest)
     else
-        call s:RunPyTest(abspath)
+        call s:RunPyTest(abspath, a:doctest)
     endif
 endfunction
 
 
 function! s:Pdb(path, ...)
-    let pdb_command = "py.test " . a:1 . " " . a:path
+    let pdb_command = "py.test --doctest-modules " . a:1 . " " . a:path
     if exists("g:ConqueTerm_Loaded")
         call conque_term#open(pdb_command, ['split', 'resize 20'], 0)
     else
@@ -1047,8 +1079,12 @@ function! s:Proxy(action, ...)
     let pdb     = 'False'
     let looponfail = 0
     let delgado = []
+    let doctest = 'False'
 
     if (a:0 > 0)
+        if ((a:1 == 'doctest') || ((a:0 > 1) && (a:2 == 'doctest')))
+            let doctest = 'True'
+        endif
         if (a:1 == 'verbose')
             let verbose = 1
         elseif (a:1 == '--pdb')
@@ -1065,37 +1101,37 @@ function! s:Proxy(action, ...)
     if (a:action == "class")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisClass(verbose, pdb, delgado)
+            call s:ThisClass(verbose, doctest, pdb, delgado)
         else
-            call s:ThisClass(verbose, pdb, delgado)
+            call s:ThisClass(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "method")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisMethod(verbose, pdb, delgado)
+            call s:ThisMethod(verbose, doctest, pdb, delgado)
         else
-            call s:ThisMethod(verbose, pdb, delgado)
+            call s:ThisMethod(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "function")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisFunction(verbose, pdb, delgado)
+            call s:ThisFunction(verbose, doctest, pdb, delgado)
         else
-            call s:ThisFunction(verbose, pdb, delgado)
+            call s:ThisFunction(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "file")
         if looponfail == 1
             call s:LoopOnFail(a:action)
-            call s:ThisFile(verbose, pdb, delgado)
+            call s:ThisFile(verbose, doctest, pdb, delgado)
         else
-            call s:ThisFile(verbose, pdb, delgado)
+            call s:ThisFile(verbose, doctest, pdb, delgado)
         endif
     elseif (a:action == "project" )
         if looponfail ==1
             call s:LoopOnFail(a:action)
-            call s:ThisProject(verbose, pdb, delgado)
+            call s:ThisProject(verbose, doctest, pdb, delgado)
         else
-            call s:ThisProject(verbose, pdb,delgado)
+            call s:ThisProject(verbose, doctest, pdb,delgado)
         endif
     elseif (a:action == "projecttestwd")
         let projecttests = s:ProjectPath()
