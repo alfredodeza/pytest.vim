@@ -560,7 +560,7 @@ function! s:RunPyTest(path, ...)
     if (len(parametrized) && parametrized != "0")
         let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
     else
-        let cmd = "py.test --tb=short " . a:path
+        let cmd = "py.test --tb=short " . '"' . a:path . '"'
     endif
 
     let out = system(cmd)
@@ -703,7 +703,12 @@ function! s:ParseErrors(stdout)
     " Loop through the output and build the error dict
 
     for w in split(a:stdout, '\n')
-        if w =~ '\v\s+(ERRORS)\s+'
+       if w =~ '\v\s+ERROR\s+collecting'
+            call s:RedBar()
+            echo "py.test had an error collecting tests, see :Pytest session for more information"
+            return
+
+        elseif w =~ '\v\s+(ERRORS)\s+'
             let failed = 1
         elseif w =~ '\v^E\s+(File)'
             let match_line_no = matchlist(w, '\v\s+(line)\s+(\d+)')
@@ -970,6 +975,7 @@ function! s:ThisProject(verbose, ...)
     let message = "py.test ==> Running tests for entire project"
     call s:Echo(message, 1)
     let abspath = s:ProjectPath()
+
     if len(abspath) <= 0
         call s:RedBar()
         echo "There are no tests defined for this project"
