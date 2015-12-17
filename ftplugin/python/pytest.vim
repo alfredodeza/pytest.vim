@@ -17,6 +17,9 @@ let g:pytest_session_error     = 0
 let g:pytest_last_session      = ""
 let g:pytest_looponfail        = 0
 
+" Process ID of async calls in NeoVim
+let s:id                       = 0
+
 
 function! s:PytestSyntax() abort
   let b:current_syntax = 'pytest'
@@ -563,19 +566,53 @@ function! s:RunPyTest(path, ...)
         let cmd = "py.test --tb=short " . '"' . a:path . '"'
     endif
 
+    " NeoVim support
+    if has('nvim')
+      if s:id
+        silent! call jobstop(s:id)
+      endif
+
+      let tempfile = fnameescape(tempname())
+
+      " If the directory for the temp files does not exist go
+      " ahead and create one for us
+      let temp_dir_location = fnamemodify(tempname(),":p:h:")
+      if !exists(temp_dir_location)
+        call system('mkdir ' . temp_dir_location)
+      endif
+
+      let s:cmdline =  cmd . " > " . tempfile
+
+      let s:id = jobstart(s:cmdline, {
+            \ 'tempfile':  tempfile,
+            \ 'on_exit':   's:HandleOutput' })
+      return
+    endif
+
     let out = system(cmd)
+    call s:HandleOutput(out)
+endfunction
+
+
+function! s:HandleOutput(...)
+    if a:0 > 0
+        let stdout = a:1
+    else
+        let stdout = join(readfile(self.tempfile), "\n")
+        call delete(self.tempfile)
+    endif
 
     " if py.test insists in giving us color, sanitize the output
     " note that ^[ is really:
     " Ctrl-V Ctrl-[
-    let out = substitute(out, '[\d\+m', '', 'g')
+    let out = substitute(stdout, '[\d\+m', '', 'g')
 
     " Pointers and default variables
     let g:pytest_session_errors = {}
     let g:pytest_session_error  = 0
-    let g:pytest_last_session   = out
+    let g:pytest_last_session   = stdout
 
-    for w in split(out, '\n')
+    for w in split(stdout, '\n')
         if w =~ '\v\=\=\s+\d+ passed in'
             call s:ParseSuccess(out)
             return
