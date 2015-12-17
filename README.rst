@@ -223,6 +223,16 @@ Whenever you hit the bottom or the top of the list, you can loop around it!
 If you hit an error that displays not the previous window (e.g. your test file)
 then a message will state that it is skipping.
 
+
+``neovim`` support
+------------------
+There is initial support now for ``neovim`` when using the flags to drop to
+a terminal (``-s`` and ``--pdb`` for example).
+
+There is currently no fully async support for actually running tests although
+work is planned to support the asynchronous capabilities of ``neovim``.
+
+
 ``delgado`` support
 -------------------
 `delgado <https://github.com/alfredodeza/delgado#pytest>`_ is a very small
@@ -258,7 +268,7 @@ License
 -------
 
 MIT
-Copyright (c) 2011-2013 Alfredo Deza <alfredodeza [at] gmail [dot] com>
+Copyright (c) 2011-2015 Alfredo Deza <alfredo [at] deza [dot] pe>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
