@@ -818,7 +818,18 @@ function! s:ParseSuccess(stdout) abort
         echon passed . repeat(" ",&columns - length)
         echohl
     else
-        call s:GreenBar()
+        " At this point we have parsed the output and have not been able to
+        " determine if the test run has had pytest errors, or faillures,
+        " passing tests, or even skipped ones. So something must be weird with
+        " the output. Instead of defaulting to 'All tests passed!' warn the
+        " user that we were unable to parse the output.
+        redraw
+        let message = "Unable to parse output. If using a plugin that alters the default output, consider disabling it. See :Pytest session"
+        let length = strlen(message) + 1
+        hi YellowBar ctermfg=black ctermbg=yellow guibg=#e5e500 guifg=black
+        echohl YellowBar
+        echon message . repeat(" ",&columns - length)
+        echohl
     endif
 endfunction
 
