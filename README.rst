@@ -226,11 +226,17 @@ then a message will state that it is skipping.
 
 ``neovim`` support
 ------------------
-There is initial support now for ``neovim`` when using the flags to drop to
-a terminal (``-s`` and ``--pdb`` for example).
+There is full support for ``neovim``. Tests will never block and will be
+completely asynchronous. When the test run ends the familiar green (or red) bar
+will be displayed.
 
-There is currently no fully async support for actually running tests although
-work is planned to support the asynchronous capabilities of ``neovim``.
+Some changes where made as well to support interactive terminal sessions (when
+using ``-s`` and ``--pdb`` for example) to make use of the terminal support
+from ``neovim``.
+
+**warning**: When calling a test, the user needs to wait until that test ends
+before calling another test, otherwise, the plugin will kill the first in order
+to call the last one.
 
 
 ``delgado`` support
