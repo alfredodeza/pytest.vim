@@ -802,6 +802,8 @@ function! s:ParseSuccess(stdout) abort
     for w in split(a:stdout, '\n')
         if w =~ '\v^\={14,}\s+\d+\s+passed'
             let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
+        elseif w =~ '\v^\={14,}\s+\d+\s+skipped'
+            let passed = matchlist(w, '\v\d+\s+skipped(.*)\s+')[0]
         endif
     endfor
     " fix this obvious redundancy
