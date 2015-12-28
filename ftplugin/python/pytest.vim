@@ -686,13 +686,18 @@ function! s:ParseFailures(stdout)
                 let error.file_path = file_path[1]
                 let error.path = file_path[1]
             endif
-        elseif w =~  '\v^E\s+\w+(.*)\s+'
+        elseif w =~  '\v^E\s+\w+(.*)\s*'
             let split_error = split(w, "E ")
-            let actual_error = substitute(split_error[0],"^\\s\\+\\|\\s\\+$","","g")
+            let actual_error = substitute(split_error[0],'\v^\s+|\s+$',"","g")
             let match_error = matchlist(actual_error, '\v(\w+):\s+(.*)')
             if (len(match_error))
                 let error.exception = match_error[1]
                 let error.error = match_error[2]
+            elseif (len(split(actual_error, ' ')) == 1)
+                " this means that we just got an exception with
+                " no error message
+                let error.exception = actual_error
+                let error.error = ""
             else
                 let error.exception = "AssertionError"
                 let error.error = actual_error
