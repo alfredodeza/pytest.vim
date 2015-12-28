@@ -1048,10 +1048,7 @@ endfunction
 
 function! s:Pdb(path, ...)
     let pdb_command = "py.test " . a:1 . " " . a:path
-    " XXX needs to get deprecated
-    if exists("g:ConqueTerm_Loaded")
-        call conque_term#open(pdb_command, ['split', 'resize 20'], 0)
-    elseif has('nvim')
+    if has('nvim')
         exe ":terminal! " . pdb_command
     else
         exe ":!" . pdb_command
