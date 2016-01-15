@@ -334,6 +334,9 @@ function! s:ProjectPath()
     let projecttestdir = finddir('tests','.;')
     let projecttestfile = findfile('tests.py','.;')
 
+    if len(projecttestdir) == 0
+        let projecttestdir = finddir('test', '.;')
+
     if(len(projecttestdir) != 0)
         let path = fnamemodify(projecttestdir, ':p:h')
     elseif(len(projecttestfile) != 0)
