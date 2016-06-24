@@ -326,9 +326,10 @@ endfunction
 
 
 function! s:CurrentPath()
-    let cwd = '"' . expand("%:p") . '"'
+    let cwd = shellescape(expand("%:p"))
     return cwd
 endfunction
+
 
 function! s:ProjectPath()
     let projecttestdir = finddir('tests','.;')
