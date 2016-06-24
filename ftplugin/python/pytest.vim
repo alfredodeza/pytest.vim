@@ -564,7 +564,7 @@ function! s:RunPyTest(path, ...)
     if (len(parametrized) && parametrized != "0")
         let cmd = "py.test -k " . parametrized . " --tb=short " . a:path
     else
-        let cmd = "py.test --tb=short " . '"' . a:path . '"'
+        let cmd = "py.test --tb=short " . a:path
     endif
 
     " NeoVim support
