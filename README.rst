@@ -31,7 +31,12 @@ This plugin provides a single command::
 
     Pytest
 
-All arguments are able to be tab-completed.
+All arguments are able to be tab-completed. To ensure the plugin will be
+loaded, these settings *must* be enabled::
+
+    :set filetype on
+    :set filetype plugin on
+
 
 Python Objects
 --------------
