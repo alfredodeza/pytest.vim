@@ -896,7 +896,7 @@ function! s:ThisMethod(verbose, ...)
       return
     endif
     if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(path, a:1)
+        call s:Pdb(path, a:1, m_name)
         return
     endif
     if (a:verbose == 1)
@@ -1052,7 +1052,18 @@ endfunction
 
 
 function! s:Pdb(path, ...)
-    let pdb_command = "py.test " . a:1 . " " . a:path
+    if (a:0 >= 2)
+      let parametrized = a:2
+    else
+      let parametrized = 0
+    endif
+
+    if (len(parametrized) && parametrized != "0")
+        let pdb_command = "py.test " . a:1 . " -k " . parametrized . " " . a:path
+    else
+        let pdb_command = "py.test " . a:1 . " " . a:path
+    endif
+
     if has('nvim')
         exe ":terminal! " . pdb_command
     else
