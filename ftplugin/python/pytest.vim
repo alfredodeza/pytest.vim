@@ -265,10 +265,10 @@ function! s:FindPythonObject(obj)
         let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*'
         let max_indent_allowed = 0
     elseif (a:obj == "method")
-        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(self[^)]*)'
+        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\_s*(self[^)]*)'
         let max_indent_allowed = 4
     else
-        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(.*self)@!'
+        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\_s*(.*self)@!'
         let max_indent_allowed = orig_indent
     endif
 
