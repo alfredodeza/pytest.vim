@@ -801,6 +801,7 @@ endfunction
 
 function! s:ParseSuccess(stdout) abort
     let passed = 0
+    let xfailed = 0
     " A passing test (or tests would look like:
     " ========================== 17 passed in 0.43 seconds ===========================
     " this would insert that into the resulting GreenBar but only the
@@ -810,18 +811,26 @@ function! s:ParseSuccess(stdout) abort
             let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
         elseif w =~ '\v^\={14,}\s+\d+\s+skipped'
             let passed = matchlist(w, '\v\d+\s+skipped(.*)\s+')[0]
+        elseif w =~ '\v\s+\d+\s+xfailed'
+            let xfailed = matchlist(w, '\v\d+\s+xfailed(.*)\s+')[0]
         endif
     endfor
+
     " fix this obvious redundancy
-    if passed
+    if ( passed || xfailed)
+        if passed
+          let report = passed
+        else
+          let report = xfailed
+        endif
         redraw
-        let length = strlen(passed) + 1
+        let length = strlen(report) + 1
         " The GUI looks too bright with plain green as a background
         " so make sure we use a solarized-like green and set the foreground
         " to black
         hi GreenBar ctermfg=black ctermbg=green guibg=#719e07 guifg=black
         echohl GreenBar
-        echon passed . repeat(" ",&columns - length)
+        echon report . repeat(" ",&columns - length)
         echohl
     else
         " At this point we have parsed the output and have not been able to
