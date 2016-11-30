@@ -960,7 +960,7 @@ function! s:ThisFunction(verbose, ...)
     endif
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(path, a:1)
+        call s:Pdb(path, a:1, c_name)
         return
     endif
 
