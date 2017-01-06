@@ -16,6 +16,8 @@ let g:pytest_session_errors    = {}
 let g:pytest_session_error     = 0
 let g:pytest_last_session      = ""
 let g:pytest_looponfail        = 0
+let g:pytest_test_dir          = 'tests'
+let g:pytest_test_file         = 'tests.py'
 
 " Process ID of async calls in NeoVim
 let s:id                       = 0
@@ -332,11 +334,11 @@ endfunction
 
 
 function! s:ProjectPath()
-    let projecttestdir = finddir('tests','.;')
-    let projecttestfile = findfile('tests.py','.;')
+    let projecttestdir = finddir(g:pytest_test_dir,'.;')
+    let projecttestfile = findfile(g:pytest_test_file,'.;')
 
     if (len(projecttestdir) == 0)
-        let projecttestdir = finddir('test', '.;')
+        let projecttestdir = finddir(g:pytest_test_dir, '.;')
     endif
 
     if(len(projecttestdir) != 0)

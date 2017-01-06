@@ -1,4 +1,4 @@
-*pytest.txt*   Runs py.test within vim and displays a red or green bar as 
+*pytest.txt*   Runs py.test within vim and displays a red or green bar as
 results with some details when it fails.
 
 Simple approach to visual selection of Python blocks.
@@ -10,9 +10,10 @@ CONTENTS                                                      *Pytest-contents*
     3. PDB ............................ |PytestPDB|
     4. Shell Support .................. |ShellSupport|
     5. Loop on Fail ................... |LooponFail|
-    6. License ........................ |PytestLicense|
-    7. Bugs ........................... |PytestBugs|
-    8. Credits ........................ |PytestCredits|
+    6. Configuration .................. |PytestConfiguration|
+    7. License ........................ |PytestLicense|
+    8. Bugs ........................... |PytestBugs|
+    9. Credits ........................ |PytestCredits|
 
 ==============================================================================
 1. Intro                                                          *PytestIntro*
@@ -32,7 +33,7 @@ This plugin provides a single command::
 
 All arguments are able to be tab-completed.
 
-For running tests the plugin provides 3 arguments with an optional one. 
+For running tests the plugin provides 3 arguments with an optional one.
 These arguments are::
 
     class
@@ -51,7 +52,7 @@ call this plugin like::
     :Pytest class
 
 Whenever a command is triggered a small message displays informing you that
-the plugin is running a certain action. In the above call, you would see 
+the plugin is running a certain action. In the above call, you would see
 something like this::
 
     Running tests for class TestMyClass
@@ -93,6 +94,9 @@ the directory tree, taking the first entry it finds. For example::
     /home/tests/          " This set of tests will not be run
     /home/project/tests/  " This set of tests will be run
 
+The project test directory may be configured with g:pytest_test_dir, while the
+test file may be configured with the g:pytest_test_file.
+
 It is easy to check which set of tests will be run (the project test working
 directory)::
 
@@ -105,7 +109,7 @@ file. The list of jumping-to-error arguments are::
 
     first
     last
-    next 
+    next
     previous
     end
 
@@ -129,7 +133,7 @@ then a message will state that it is skipping.
 
 Finally, you can also display in a split scratch buffer either the last list
 of failed tests (with line numbers, errors and paths) or the last ``py.test``
-session (similar to what you would see in a terminal). The arguments that 
+session (similar to what you would see in a terminal). The arguments that
 you would need to provide for such actions are::
 
     session
@@ -148,13 +152,13 @@ will close the scratch buffer if it is open or will open it if its closed.
 ==============================================================================
 3. PDB                                                             *PytestPDB*
 
-If you have ever needed to get into a `pdb` session and debug your code, you 
+If you have ever needed to get into a `pdb` session and debug your code, you
 already know that it is a horrible experience to be jumping between Vim and
 the terminal. **pytest.vim** now includes a way of calling it with 2 options
 that will let you drop to a shell (inside Vim!) and control your pdb session.
 
 **py.test pdb on fail**
-Use this option when you need to use the built-in pdb support from py.test 
+Use this option when you need to use the built-in pdb support from py.test
 (e.g. drop to pdb when a test fails).
 
 ::
@@ -166,7 +170,7 @@ supported (`class`, `method` and `file`).
 
 
 **py.test no capture**
-If you are placing `import pdb; pdb.set_trace()` somewhere in your code and 
+If you are placing `import pdb; pdb.set_trace()` somewhere in your code and
 you want to drop to pdb when that code gets executed, then you need to pass
 in the no-capture flag::
 
@@ -187,7 +191,7 @@ then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 5. Loop on Fail                                                   *LooponFail*
 
 This is an *extra* option that will allow you to loop (run again) on fail.
-If the test fails, then this option will make Vim run the same test again as 
+If the test fails, then this option will make Vim run the same test again as
 soon as the file is written.
 
 Once the test passes, it will no longer re-run the tests again. This option is
@@ -202,12 +206,41 @@ the plugin you can do so by running the following command::
     :Pytest clear
 
 This is specifically useful when `looponfail` has been enabled and you want to
-stop its automatic behavior. Remember that `looponfail` will run every time you 
+stop its automatic behavior. Remember that `looponfail` will run every time you
 write the buffer and will keep doing so unless your test passes.
 
 
 ==============================================================================
-5. License                                                     *PytestLicense*
+6. Configuration                                         *PytestConfiguration*
+
+                                                           *g:pytest_test_dir*
+g:pytest_test_dir~
+Default: 'tests'
+
+Project test directory
+
+Example:
+>
+        let g:pytest_test_dir = 'test_suite'
+<
+Any following Pytest plugin command will expect to find tests in
+/path/to/project/test_suite
+
+                                                          *g:pytest_test_file*
+g:pytest_test_file~
+Default: 'tests.py'
+
+Test file
+
+Example:
+>
+        let g:pytest_test_file = 'test_myproj.py'
+<
+configures the test file to be /path/to/project/tests/test_myproj.py
+(assuming the default value for g:pytest_test_dir)
+
+==============================================================================
+7. License                                                     *PytestLicense*
 
 MIT
 Copyright (c) 2011 Alfredo Deza <alfredodeza [at] gmail [dot] com>
@@ -231,13 +264,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==============================================================================
-6. Bugs                                                            *PytestBugs*
+8. Bugs                                                            *PytestBugs*
 
 If you find a bug please post it on the issue tracker:
 https://github.com/alfredodeza/pytest.vim/issues
 
 ==============================================================================
-7. Credits                                                      *PytestCredits*
+9. Credits                                                      *PytestCredits*
 
 Thanks to Holger Krekel for the awesome py.test tool as it makes my life so
 much better.

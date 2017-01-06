@@ -195,7 +195,7 @@ most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?s
 then `pytest.vim` will use that instead of Vim's own dumb shell environment.
 
 `looponfail`
----------------
+------------
 This is an *extra* option that will allow you to loop (run again) on fail.
 If the test fails, then this option will make Vim run the same test again as
 soon as the file is written.
@@ -274,6 +274,27 @@ This is how a very verbose distributed call would look like::
 The results should be show in the terminal where ``delgado`` is running, not in
 Vim.
 
+Configuration
+-------------
+Test directory
+^^^^^^^^^^^^^^
+By default the project test directory is ``tests`` (i.e. test files are assumed
+to be in ``/path/to/project/test``). The global variable ``pytest_test_dir`` may
+be used to change this, for example::
+
+    let g:pytest_test_dir = 'test_suite'
+
+configures the test directory to be ``/path/to/project/test_suite``
+
+Test file
+^^^^^^^^^
+By default the test file is ``tests.py``.The global variable
+``pytest_test_file`` may be used to change this, for example::
+
+    let g:pytest_test_file = 'test_myproj.py'
+
+configures the test file to be ``/path/to/project/tests/test_myproj.py``
+(assuming the default value for the project test directory)
 
 License
 -------
