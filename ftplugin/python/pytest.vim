@@ -267,10 +267,10 @@ function! s:FindPythonObject(obj)
         let objregexp  = '\v^\s*(.*class)\s+(\w+)\s*'
         let max_indent_allowed = 0
     elseif (a:obj == "method")
-        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(self[^)]*)'
+        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\_s*(self[^)]*)'
         let max_indent_allowed = 4
     else
-        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\s*(.*self)@!'
+        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\_s*(.*self)@!'
         let max_indent_allowed = orig_indent
     endif
 
@@ -588,22 +588,24 @@ function! s:RunPyTest(path, ...)
 
       let s:id = jobstart(s:cmdline, {
             \ 'tempfile':  tempfile,
-            \ 'on_exit':   's:HandleOutput' })
+            \ 'on_exit':   function('s:HandleOutputNeoVim') })
       return
     endif
 
-    let out = system(cmd)
-    call s:HandleOutput(out)
+    let stdout = system(cmd)
+    call s:HandleOutput(stdout)
 endfunction
 
 
-function! s:HandleOutput(...)
-    if a:0 > 0
-        let stdout = a:1
-    else
-        let stdout = join(readfile(self.tempfile), "\n")
-        call delete(self.tempfile)
-    endif
+function! s:HandleOutputNeoVim(...) dict
+    let stdout = join(readfile(self.tempfile), "\n")
+    call delete(self.tempfile)
+    call s:HandleOutput(stdout)
+endfunction
+
+
+function! s:HandleOutput(stdout)
+    let stdout = a:stdout
 
     " if py.test insists in giving us color, sanitize the output
     " note that ^[ is really:
