@@ -896,7 +896,7 @@ function! s:ThisMethod(verbose, ...)
       return
     endif
     if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(path, a:1, m_name)
+        call s:Pdb(path, a:1, parametrized_flag)
         return
     endif
     if (a:verbose == 1)
@@ -1054,8 +1054,6 @@ endfunction
 function! s:Pdb(path, ...)
     if (a:0 >= 2)
       let parametrized = a:2
-    else
-      let parametrized = 0
     endif
 
     if (len(parametrized) && parametrized != "0")
