@@ -18,6 +18,7 @@ let g:pytest_last_session      = ""
 let g:pytest_looponfail        = 0
 let g:pytest_test_dir          = 'tests'
 let g:pytest_test_file         = 'tests.py'
+let g:pytest_open_errors       = 'default'
 
 " Process ID of async calls in NeoVim
 let s:id                       = 0
@@ -368,6 +369,10 @@ endfunction
 
 
 function! s:OpenError(path)
+  if g:pytest_open_errors == 'current'
+    silent! execute ":e " . a:path
+    return
+  endif
 	let winnr = bufwinnr('GoToError.pytest')
 	silent! execute  winnr < 0 ? 'botright new ' . ' GoToError.pytest' : winnr . 'wincmd w'
 	setlocal buftype=nowrite bufhidden=wipe nobuflisted noswapfile nowrap number
