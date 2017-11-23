@@ -875,7 +875,7 @@ function! s:ThisMethod(verbose, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let m_name  = s:NameOfCurrentMethod()
-    let is_parametrized = s:HasPythonDecorator(line('.'))
+    let is_parametrized = s:IsParametrized(line('.'))
 
     let c_name  = s:NameOfCurrentClass()
     let abspath = s:CurrentPath()
@@ -920,7 +920,7 @@ function! s:ThisMethod(verbose, ...)
 endfunction
 
 
-function! s:HasPythonDecorator(line)
+function! s:IsParametrized(line)
     " Get to the previous line where the decorator lives
     let line = a:line -1
     " if it is whitespace or there is nothing there, return
@@ -932,7 +932,13 @@ function! s:HasPythonDecorator(line)
     " empty lines
     while (getline(line) !~ '^\\s*\\S')
         if (getline(line) =~ '\v^(.*\@[a-zA-Z])')
-            return 1
+            " this is the only situation where we are decorated, so check
+            " to see if this is really pytest.mark.parametrized or just some
+            " other decorator
+            let decorated_line = getline(line)
+            if (decorated_line =~ '\v(.*)parametrize(.*)') && (decorated_line !~ '\v^\s*#(.*)')
+                return 1
+            endif
         elseif (getline(line) =~ '\v^\s*(.*def)\s+(\w+)\s*\(\s*')
             " so we found either a function or a class, therefore, no way we have
             " a decorator
@@ -951,7 +957,7 @@ function! s:ThisFunction(verbose, ...)
     let save_cursor = getpos('.')
     call s:ClearAll()
     let c_name      = s:NameOfCurrentFunction()
-    let is_parametrized = s:HasPythonDecorator(line('.'))
+    let is_parametrized = s:IsParametrized(line('.'))
     let abspath     = s:CurrentPath()
     if (strlen(c_name) == 1)
         call setpos('.', save_cursor)
