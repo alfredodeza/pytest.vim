@@ -623,6 +623,7 @@ function! s:HandleOutput(stdout)
     for w in split(stdout, '\n')
         if w =~ '\v\=\=\s+\d+ passed in'
             call s:ParseSuccess(out)
+            let g:pytest_looponfail = 0
             return
         elseif w =~ '\v\s+(FAILURES)\s+'
             call s:ParseFailures(out)
