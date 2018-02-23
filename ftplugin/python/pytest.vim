@@ -90,13 +90,13 @@ function! s:LoopProxy(type)
     " calling when autocmd is executed
     if g:pytest_looponfail == 1
         if a:type == 'method'
-            call s:ThisMethod(0, 'False', [])
+            call s:ThisMethod(0, 'False', [], [])
         elseif a:type == 'class'
-            call s:ThisClass(0, 'False', [])
+            call s:ThisClass(0, 'False', [], [])
         elseif a:type == 'function'
-            call s:ThisFunction(0, 'False', [])
+            call s:ThisFunction(0, 'False', [], [])
         elseif a:type == 'file'
-            call s:ThisFile(0, 'False', [])
+            call s:ThisFile(0, 'False', [], [])
         endif
 
         " FIXME Removing this for now until I can find
