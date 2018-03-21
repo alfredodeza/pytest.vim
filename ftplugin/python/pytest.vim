@@ -632,6 +632,8 @@ function! s:HandleOutput(stdout)
             call s:ParseErrors(out)
             return
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
+            call s:ParseError(out)
+            return
             call s:RedBar()
             echo "py.test had an Error, see :Pytest session for more information"
             if exists('$VIRTUAL_ENV')
@@ -745,6 +747,64 @@ function! s:ParseFailures(stdout)
     endif
 endfunction
 
+function! s:ParseError(stdout)
+  " Unlike ParseErrors, this will try to inspect a (generally) fatal error
+  " when running pytest. The report for an error looks similar to:
+  " ============================= test session starts ==============================
+  " platform darwin -- Python 2.7.14, pytest-3.4.1, py-1.5.2, pluggy-0.6.0
+  " rootdir: /Users/alfredo/vim/pytest.vim/tests, inifile: pytest.ini
+  " plugins: inobject-0.0.1
+  " collected 0 items / 1 errors
+  "
+  " ==================================== ERRORS ====================================
+  " ________________ ERROR collecting fixtures/test_import_error.py ________________
+  " ImportError while importing test module '/Users/alfredo/vim/pytest.vim/tests/fixtures/test_import_error.py'.
+  " Hint: make sure your test modules/packages have valid Python names.
+  " Traceback:
+  " test_import_error.py:1: in <module>
+  "     import DoesNotExistModule
+  " E   ImportError: No module named DoesNotExistModule
+  " !!!!!!!!!!!!!!!!!!! Interrupted: 1 errors during collection !!!!!!!!!!!!!!!!!!!!
+  " =========================== 1 error in 0.12 seconds ============================
+
+    " Pointers and default variables
+    let failed = 1
+    let errors = {}
+    let error = {}
+    " Loop through the output and build the error dict
+
+    for w in split(a:stdout, '\n')
+        if w =~ '\v^E\s+(File)'
+            let match_line_no = matchlist(w, '\v\s+(line)\s+(\d+)')
+            let error['line'] = match_line_no[2]
+            let error['file_line'] = match_line_no[2]
+            let split_file = split(w, "E ")
+            let match_file = matchlist(split_file[0], '\v"(.*.py)"')
+            let error['file_path'] = match_file[1]
+            let error['path'] = match_file[1]
+        elseif w =~ '\v^(.*)\.py:(\d+)'
+            let match_result = matchlist(w, '\v:(\d+)')
+            let error.line = match_result[1]
+            let file_path = matchlist(w, '\v(.*.py):')
+            let error.path = file_path[1]
+            let error.file_path = file_path[1]
+        endif
+        if w =~ '\v^E\s+(\w+):\s+'
+            let split_error = split(w, "E ")
+            let match_error = matchlist(split_error[0], '\v(\w+):')
+            let error['exception'] = match_error[1]
+            let actual_error = split(split_error[0], match_error[0])[1]
+            let flat_error = substitute(actual_error,"^\\s\\+\\|\\s\\+$","","g")
+            let error.error = flat_error
+        endif
+    endfor
+
+    let errors[1] = error
+
+    let g:pytest_session_errors = errors
+    call s:ShowFails(1)
+endfunction
+
 
 function! s:ParseErrors(stdout)
     " Pointers and default variables
@@ -755,6 +815,8 @@ function! s:ParseErrors(stdout)
 
     for w in split(a:stdout, '\n')
        if w =~ '\v\s+ERROR\s+collecting'
+            call s:ParseError(a:stdout)
+            return
             call s:RedBar()
             echo "py.test had an error collecting tests, see :Pytest session for more information"
             return
