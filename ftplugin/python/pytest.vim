@@ -872,6 +872,8 @@ endfunction
 function! s:ParseSuccess(stdout) abort
     let passed = 0
     let xfailed = 0
+    let collected_tests = 0
+    let no_tests_ran = 0
     " A passing test (or tests would look like:
     " ========================== 17 passed in 0.43 seconds ===========================
     " this would insert that into the resulting GreenBar but only the
@@ -881,10 +883,26 @@ function! s:ParseSuccess(stdout) abort
             let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
         elseif w =~ '\v^\={14,}\s+\d+\s+skipped'
             let passed = matchlist(w, '\v\d+\s+skipped(.*)\s+')[0]
+        elseif w =~ '\v^\={14,}\s+no\s+tests\s+ran'
+            let no_tests_ran = 1
+        elseif w =~ '\v\s+collected\s+\d+\s+items'
+            let collected_tests = matchlist(w, '\v\d+')[0]
         elseif w =~ '\v\s+\d+\s+xfailed'
             let xfailed = matchlist(w, '\v\d+\s+xfailed(.*)\s+')[0]
         endif
     endfor
+
+    " if no tests ran, no need to continue processing
+    " TODO make a helper out of this
+    redraw
+    let message = collected_tests . " collected tests, no tests ran. See :Pytest session"
+    let length = strlen(message) + 1
+    hi YellowBar ctermfg=black ctermbg=yellow guibg=#e5e500 guifg=black
+    echohl YellowBar
+    echon message . repeat(" ",&columns - length)
+    echohl
+    return
+
 
     " fix this obvious redundancy
     if ( passed || xfailed)
