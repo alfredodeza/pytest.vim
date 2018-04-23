@@ -1,0 +1,4 @@
+{
+  "test_file.py::TestFileObjects": true, 
+  "test_file.py::TestFileObjects::()::test_no_session": true
+}
