@@ -333,6 +333,16 @@ function! s:CurrentPath()
 endfunction
 
 
+function! s:AbsoluteTestPath(python_object)
+    let cwd = expand("%:p")
+    if len(a:python_object)
+      return fnameescape(cwd . a:python_object)
+    else
+      return fnameescape(cwd)
+    endif
+endfunction
+
+
 function! s:ProjectPath()
     let projecttestdir = finddir(g:pytest_test_dir,'.;')
     let projecttestfile = findfile(g:pytest_test_file,'.;')
@@ -771,6 +781,7 @@ function! s:ParseError(stdout)
     let failed = 1
     let errors = {}
     let error = {}
+    let no_tests_found = 0
     " Loop through the output and build the error dict
 
     for w in split(a:stdout, '\n')
@@ -788,14 +799,16 @@ function! s:ParseError(stdout)
             let file_path = matchlist(w, '\v(.*.py):')
             let error.path = file_path[1]
             let error.file_path = file_path[1]
+        elseif w =~ '\v^ERROR:\s+not\s+found'
+          let message = "No valid test names found. No tests ran. See :Pytest session"
+          return s:WarningMessage(message)
         endif
         if w =~ '\v^E\s+(\w+):\s+'
             let split_error = split(w, "E ")
             let match_error = matchlist(split_error[0], '\v(\w+):')
             let error['exception'] = match_error[1]
             let actual_error = split(split_error[0], match_error[0])[1]
-            let flat_error = substitute(actual_error,"^\\s\\+\\|\\s\\+$","","g")
-            let error.error = flat_error
+            let error.error = substitute(actual_error,"^\\s\\+\\|\\s\\+$","","g")
         endif
     endfor
 
@@ -878,12 +891,18 @@ function! s:ParseSuccess(stdout) abort
     " ========================== 17 passed in 0.43 seconds ===========================
     " this would insert that into the resulting GreenBar but only the
     " interesting portion
+    "
+    "
+" ERROR: not found: /Users/alfredo/vim/pytest.vim/tests/fixtures/test_functions.py::foo
+" (no name '/Users/alfredo/vim/pytest.vim/tests/fixtures/test_functions.py::foo' in any of [<Module 'fixtures/test_functions.py'>])
     for w in split(a:stdout, '\n')
         if w =~ '\v^\={14,}\s+\d+\s+passed'
             let passed = matchlist(w, '\v\d+\s+passed(.*)\s+')[0]
         elseif w =~ '\v^\={14,}\s+\d+\s+skipped'
             let passed = matchlist(w, '\v\d+\s+skipped(.*)\s+')[0]
         elseif w =~ '\v^\={14,}\s+no\s+tests\s+ran'
+            let no_tests_ran = 1
+        elseif w =~ '\v^ERROR:\s+not\s+found'
             let no_tests_ran = 1
         elseif w =~ '\v\s+collected\s+\d+\s+items'
             let collected_tests = matchlist(w, '\v\d+')[0]
@@ -894,15 +913,16 @@ function! s:ParseSuccess(stdout) abort
 
     " if no tests ran, no need to continue processing
     " TODO make a helper out of this
-    redraw
-    let message = collected_tests . " collected tests, no tests ran. See :Pytest session"
-    let length = strlen(message) + 1
-    hi YellowBar ctermfg=black ctermbg=yellow guibg=#e5e500 guifg=black
-    echohl YellowBar
-    echon message . repeat(" ",&columns - length)
-    echohl
-    return
-
+    if no_tests_ran
+      redraw
+      let message = collected_tests . " collected tests, no tests ran. See :Pytest session"
+      let length = strlen(message) + 1
+      hi YellowBar ctermfg=black ctermbg=yellow guibg=#e5e500 guifg=black
+      echohl YellowBar
+      echon message . repeat(" ",&columns - length)
+      echohl
+      return
+    endif
 
     " fix this obvious redundancy
     if ( passed || xfailed)
@@ -952,6 +972,17 @@ function! s:GreenBar()
     echohl GreenBar
     echon "All tests passed." . repeat(" ",&columns - 18)
     echohl
+endfunction
+
+
+function! s:WarningMessage(message)
+    redraw
+    let length = strlen(a:message) + 1
+    hi YellowBar ctermfg=black ctermbg=yellow guibg=#e5e500 guifg=black
+    echohl YellowBar
+    echon a:message . repeat(" ",&columns - length)
+    echohl
+    return
 endfunction
 
 
