@@ -328,18 +328,8 @@ endfunction
 
 
 function! s:CurrentPath()
-    let cwd = shellescape(expand("%:p"))
+    let cwd = fnameescape(expand("%:p"))
     return cwd
-endfunction
-
-
-function! s:AbsoluteTestPath(python_object)
-    let cwd = expand("%:p")
-    if len(a:python_object)
-      return fnameescape(cwd . a:python_object)
-    else
-      return fnameescape(cwd)
-    endif
 endfunction
 
 
@@ -564,9 +554,11 @@ function! s:ResetAll()
 endfunction!
 
 
-function! s:RunPyTest(path, ...)
+function! s:RunPyTest(path, ...) abort
     let parametrized = 0
     let extra_flags = ''
+    let job_id = get(b:, 'job_id')
+
     if (a:0 > 0)
       let parametrized = a:1
       if len(a:2)
@@ -605,9 +597,30 @@ function! s:RunPyTest(path, ...)
       return
     endif
 
+    " Vim 8 support
+    if v:version >= 800
+      if type(job_id) != type(0)
+        call job_stop(job_id)
+      endif
+
+      let b:job_id = job_start(cmd, {'close_cb': 'CloseHandler'})
+
+      return
+    endif
+
+
     let stdout = system(cmd)
     call s:HandleOutput(stdout)
 endfunction
+
+
+func! CloseHandler(channel)
+  let stdout = ""
+  while ch_status(a:channel, {'part': 'out'}) == 'buffered'
+    let stdout = stdout . ch_read(a:channel) . "\n"
+  endwhile
+  call s:HandleOutput(stdout)
+endfunc
 
 
 function! s:HandleOutputNeoVim(...) dict
@@ -933,13 +946,19 @@ function! s:ParseSuccess(stdout) abort
         endif
         redraw
         let length = strlen(report) + 1
+        let default_showcmd = &showcmd
         " The GUI looks too bright with plain green as a background
         " so make sure we use a solarized-like green and set the foreground
         " to black
+        set noshowcmd
         hi GreenBar ctermfg=black ctermbg=green guibg=#719e07 guifg=black
+        "hi GreenBar ctermfg=black ctermbg=green guibg=green guifg=black
         echohl GreenBar
         echon report . repeat(" ",&columns - length)
         echohl
+        if default_showcmd
+          set showcmd
+        endif
     else
         " At this point we have parsed the output and have not been able to
         " determine if the test run has had pytest errors, or faillures,
@@ -1217,7 +1236,9 @@ function! s:Pdb(path, ...)
         let pdb_command = "py.test " . a:1 . " " . a:path
     endif
 
-    if has('nvim')
+    if has('terminal')
+        exe ":term " . pdb_command
+    elseif has('nvim')
         exe ":terminal! " . pdb_command
     else
         exe ":!" . pdb_command
