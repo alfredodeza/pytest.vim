@@ -559,6 +559,12 @@ function! s:RunPyTest(path, ...) abort
     let extra_flags = ''
     let job_id = get(b:, 'job_id')
 
+    if !exists("g:pytest_use_async")
+      let s:pytest_use_async=1
+    else
+      let s:pytest_use_async=g:pytest_use_async
+    endif
+
     if (a:0 > 0)
       let parametrized = a:1
       if len(a:2)
@@ -598,7 +604,7 @@ function! s:RunPyTest(path, ...) abort
     endif
 
     " Vim 8 support
-    if v:version >= 800
+    if v:version >= 800 && s:pytest_use_async == 1
       if type(job_id) != type(0)
         call job_stop(job_id)
       endif
