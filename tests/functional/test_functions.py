@@ -47,3 +47,13 @@ class TestFunctionObjects(object):
         vim.normal("/test_foo")
         result = vim.command("Pytest class")
         assert "Unable to find a matching class for testing" ==  result
+
+    def test_cursor_does_not_change_position(self, vim, path):
+        vim.raw_command("e %s" % path('test_functions.py'))
+        vim.normal("/test_foo")
+        # move down to where the assert happens
+        vim.normal('jfT')
+        before_position = vim.evaluate("getpos('.')")
+        result = vim.command("Pytest function")
+        after_position = vim.evaluate("getpos('.')")
+        assert before_position == after_position
