@@ -1111,6 +1111,11 @@ function! s:ThisFunction(verbose, ...)
         call s:Echo("Unable to find a matching function for testing")
         return
     endif
+
+    " If we didn't error, still, save the cursor so we are back
+    " to the original position
+    call setpos('.', save_cursor)
+
     let message  = "py.test ==> Running tests for function " . c_name
     call s:Echo(message, 1)
 
