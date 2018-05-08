@@ -244,6 +244,7 @@ def path():
 def vim(request):
     server = Vim(servername='pytest_vim_class')
     server.start()
+    server.raw_command('let g:pytest_use_async=0')
 
     def fin():
         logger.info('stopping vim server')
