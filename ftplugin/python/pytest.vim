@@ -1049,13 +1049,14 @@ function! s:ThisMethod(verbose, ...)
       call s:Delgado(path, a:2, message)
       return
     endif
-    if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(path, a:1, parametrized_flag)
-        return
-    endif
 
     if len(a:3)
         let extra_flags = join(a:3, ' ')
+    endif
+
+    if ((a:1 == '--pdb') || (a:1 == '-s'))
+        call s:Pdb(path, a:1, parametrized_flag, extra_flags)
+        return
     endif
 
     if (a:verbose == 1)
@@ -1130,13 +1131,13 @@ function! s:ThisFunction(verbose, ...)
       return
     endif
 
-    if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(path, a:1, c_name)
-        return
-    endif
-
     if len(a:3)
         let extra_flags = join(a:3, ' ')
+    endif
+
+    if ((a:1 == '--pdb') || (a:1 == '-s'))
+        call s:Pdb(path, a:1, c_name, extra_flags)
+        return
     endif
 
     if (a:verbose == 1)
@@ -1168,7 +1169,7 @@ function! s:ThisClass(verbose, ...)
     endif
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(path, a:1)
+        call s:Pdb(path, a:1, 0, extra_flags)
         return
     endif
 
@@ -1196,7 +1197,7 @@ function! s:ThisFile(verbose, ...)
     endif
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(abspath, a:1)
+        call s:Pdb(abspath, a:1, 0, extra_flags)
         return
     endif
 
@@ -1212,6 +1213,7 @@ function! s:ThisFile(verbose, ...)
 endfunction
 
 function! s:ThisProject(verbose, ...)
+    let extra_flags = ''
     call s:ClearAll()
     let message = "py.test ==> Running tests for entire project"
     call s:Echo(message, 1)
@@ -1223,28 +1225,36 @@ function! s:ThisProject(verbose, ...)
         return
     endif
 
+    if len(a:2)
+        let extra_flags = join(a:2, ' ')
+    endif
+
     if ((a:1 == '--pdb') || (a:1 == '-s'))
-        call s:Pdb(abspath, a:1)
+        call s:Pdb(abspath, a:1, 0, extra_flags)
         return
     endif
 
     if (a:verbose == 1)
         call s:RunInSplitWindow(abspath)
     else
-        call s:RunPyTest(abspath)
+        call s:RunPyTest(abspath, 0, extra_flags)
     endif
 endfunction
 
 
 function! s:Pdb(path, ...)
+    let extra_flags = ''
     if (a:0 >= 2)
       let parametrized = a:2
+      if len(a:3)
+        let extra_flags = a:3
+      endif
     endif
 
     if (len(parametrized) && parametrized != "0")
-        let pdb_command = "py.test " . a:1 . " -k " . parametrized . " " . a:path
+        let pdb_command = "py.test " . a:1 . " -k " . parametrized . " " . extra_flags . " " . a:path
     else
-        let pdb_command = "py.test " . a:1 . " " . a:path
+        let pdb_command = "py.test " . a:1 . " " . extra_flags . " " . a:path
     endif
 
     if has('terminal')
