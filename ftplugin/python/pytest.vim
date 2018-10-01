@@ -65,6 +65,12 @@ function! s:PytestFailsSyntax() abort
 endfunction
 
 
+function! s:SetExecutable()
+    if !exists("g:pytest_executable")
+      let g:pytest_executable = "py.test"
+    endif
+endfunction
+
 function! s:LoopOnFail(type)
 
     augroup pytest_loop_autocmd
@@ -354,7 +360,7 @@ endfunction
 
 
 function! s:RunInSplitWindow(path)
-    let cmd = "py.test --tb=short " . a:path
+    let cmd = g:pytest_executable . " --tb=short " . a:path
     let command = join(map(split(cmd), 'expand(v:val)'))
     let winnr = bufwinnr('PytestVerbose.pytest')
     silent! execute  winnr < 0 ? 'botright new ' . 'PytestVerbose.pytest' : winnr . 'wincmd w'
@@ -575,9 +581,9 @@ function! s:RunPyTest(path, ...) abort
     let g:pytest_last_session = ""
 
     if (len(parametrized) && parametrized != "0")
-        let cmd = "py.test -k " . parametrized . " " . extra_flags . " --tb=short " . a:path
+        let cmd = g:pytest_executable . " -k " . parametrized . " " . extra_flags . " --tb=short " . a:path
     else
-        let cmd = "py.test " . extra_flags . " --tb=short " . a:path
+        let cmd = g:pytest_executable . " " . extra_flags . " --tb=short " . a:path
     endif
 
     " NeoVim support
@@ -613,7 +619,6 @@ function! s:RunPyTest(path, ...) abort
 
       return
     endif
-
 
     let stdout = system(cmd)
     call s:HandleOutput(stdout)
@@ -664,7 +669,7 @@ function! s:HandleOutput(stdout)
             call s:ParseError(out)
             return
             call s:RedBar()
-            echo "py.test had an Error, see :Pytest session for more information"
+            echo g:pytest_executable . " had an Error, see :Pytest session for more information"
             if exists('$VIRTUAL_ENV')
               if !executable($VIRTUAL_ENV . "/bin/py.test")
                 echo repeat("*", 80)
@@ -679,7 +684,7 @@ function! s:HandleOutput(stdout)
             return
         elseif w =~ '\v^(.*)\s*INTERNALERROR'
             call s:RedBar()
-            echo "py.test had an InternalError, see :Pytest session for more information"
+            echo g:pytest_executable . " had an InternalError, see :Pytest session for more information"
             return
         endif
     endfor
@@ -772,7 +777,7 @@ function! s:ParseFailures(stdout)
         call s:GreenBar()
     elseif (pytest_error != "")
         call s:RedBar()
-        echo "py.test " . pytest_error
+        echo g:pytest_executable . " " . pytest_error
     endif
 endfunction
 
@@ -850,7 +855,7 @@ function! s:ParseErrors(stdout)
             call s:ParseError(a:stdout)
             return
             call s:RedBar()
-            echo "py.test had an error collecting tests, see :Pytest session for more information"
+            echo g:pytest_executable . " had an error collecting tests, see :Pytest session for more information"
             return
 
         elseif w =~ '\v\s+(ERRORS)\s+'
@@ -1037,11 +1042,11 @@ function! s:ThisMethod(verbose, ...)
     if is_parametrized
         let path =  abspath . "::" . c_name
         let parametrized_flag = m_name
-        let message = "py.test ==> Running test for parametrized method " . m_name
+        let message = g:pytest_executable . " ==> Running test for parametrized method " . m_name
     else
         let path =  abspath . "::" . c_name . "::" . m_name
         let parametrized_flag = "0"
-        let message = "py.test ==> Running test for method " . m_name
+        let message = g:pytest_executable . " ==> Running test for method " . m_name
     endif
 
     call s:Echo(message, 1)
@@ -1117,7 +1122,7 @@ function! s:ThisFunction(verbose, ...)
     " to the original position
     call setpos('.', save_cursor)
 
-    let message  = "py.test ==> Running tests for function " . c_name
+    let message  = g:pytest_executable . " ==> Running tests for function " . c_name
     call s:Echo(message, 1)
 
     if is_parametrized
@@ -1159,7 +1164,7 @@ function! s:ThisClass(verbose, ...)
         call s:Echo("Unable to find a matching class for testing")
         return
     endif
-    let message  = "py.test ==> Running tests for class " . c_name
+    let message  = g:pytest_executable . " ==> Running tests for class " . c_name
     call s:Echo(message, 1)
 
     let path = abspath . "::" . c_name
@@ -1188,7 +1193,7 @@ endfunction
 function! s:ThisFile(verbose, ...)
     let extra_flags = ''
     call s:ClearAll()
-    let message = "py.test ==> Running tests for entire file"
+    let message = g:pytest_executable . " ==> Running tests for entire file"
     call s:Echo(message, 1)
     let abspath = s:CurrentPath()
     if len(a:2)
@@ -1215,7 +1220,7 @@ endfunction
 function! s:ThisProject(verbose, ...)
     let extra_flags = ''
     call s:ClearAll()
-    let message = "py.test ==> Running tests for entire project"
+    let message = g:pytest_executable . " ==> Running tests for entire project"
     call s:Echo(message, 1)
     let abspath = s:ProjectPath()
 
@@ -1252,9 +1257,9 @@ function! s:Pdb(path, ...)
     endif
 
     if (len(parametrized) && parametrized != "0")
-        let pdb_command = "py.test " . a:1 . " -k " . parametrized . " " . extra_flags . " " . a:path
+        let pdb_command = g:pytest_executable . " " . a:1 . " -k " . parametrized . " " . extra_flags . " " . a:path
     else
-        let pdb_command = "py.test " . a:1 . " " . extra_flags . " " . a:path
+        let pdb_command = g:pytest_executable . " " . a:1 . " " . extra_flags . " " . a:path
     endif
 
     if has('terminal')
@@ -1305,8 +1310,9 @@ endfunction
 
 
 function! s:Proxy(action, ...)
-    if (executable("py.test") == 0)
-        call s:Echo("py.test not found. This plugin needs py.test installed and accessible")
+    call s:SetExecutable()
+    if (executable(g:pytest_executable . "") == 0)
+        call s:Echo(g:pytest_executable . " not found. This plugin needs py.test installed and accessible")
         return
     endif
 
