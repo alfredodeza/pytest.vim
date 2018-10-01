@@ -122,6 +122,7 @@ class Vim(object):
         command = ['gvim', '--servername', self.servername]
 
         if vimrc:
+            self.vimrc = vimrc
             command.extend(['-u', vimrc])
 
         run(command)
@@ -174,7 +175,7 @@ class Vim(object):
         return result.strip('\n')
 
     def evaluate(self, expr):
-        out, err, code = call(['gvim', '--servername', self.servername,  '--remote-expr', expr])
+        out, err, code = call(['gvim', '--servername', self.servername, '--remote-expr', expr])
 
         if re.match('^E\d+:', out):
             raise RuntimeError("Error while running evaluate with '%s': %s" % (expr, out))
@@ -240,6 +241,34 @@ def path():
     return get_path
 
 
+@pytest.fixture()
+def custom_executable(tmpfile):
+    def apply(name=None):
+        name = name or 'pytest4'
+        pytest_executable = '%s/bin/py.test' % os.getenv('VIRTUAL_ENV')
+        custom_executable = '%s/bin/%s' % (os.getenv('VIRTUAL_ENV'), name)
+        if not os.path.exists(custom_executable):
+            os.symlink(pytest_executable, custom_executable)
+        return custom_executable
+
+    def fin():
+        os.remove(custom_executable)
+
+@pytest.fixture
+def tmpfile(tmpdir):
+    """
+    Create a temporary file, optionally filling it with contents, returns an
+    absolute path to the file when called
+    """
+    def generate_file(name='vimrc', contents='', directory=None):
+        directory = directory or str(tmpdir)
+        path = os.path.join(directory, name)
+        with open(path, 'w') as fp:
+            fp.write(contents)
+        return path
+    return generate_file
+
+
 @pytest.fixture(scope="class")
 def vim(request):
     server = Vim(servername='pytest_vim_class')
@@ -251,3 +280,19 @@ def vim(request):
         server.stop()
     request.addfinalizer(fin)
     return server  # provide the fixture value
+
+
+@pytest.fixture(scope="class")
+def vim_customized(request):
+    server = Vim(servername='pytest_vim_class')
+    def apply(vimrc_path):
+        server.start(vimrc_path)
+        server.raw_command('let g:pytest_use_async=0')
+        return server  # provide the fixture value
+
+    def fin():
+        logger.info('stopping vim server')
+        server.stop()
+    request.addfinalizer(fin)
+
+    return apply
