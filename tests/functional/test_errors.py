@@ -1,4 +1,5 @@
 
+
 class TestErrors(object):
 
     def test_reports_import_error(self, vim, path):
