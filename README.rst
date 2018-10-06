@@ -184,15 +184,14 @@ in the no-capture flag::
 
     :Pytest class -s
 
-Again the above command shows `class` but you can use this with all the objects
-supported (`class`, `method`, `function` and `file`).
+Again the above command shows ``class`` but you can use this with all the objects
+supported (``class``, ``method``, ``function`` and ``file``).
 
 Shell Support
 -------------
 This plugin provides a way to have a better shell experience when running
-`verbose` or `pdb` flags by using the `Conque.vim` plugin. If you have this
-most excellent piece of Vim plugin (see: http://www.vim.org/scripts/script.php?script_id=2771)
-then `pytest.vim` will use that instead of Vim's own dumb shell environment.
+``verbose`` or ``pdb`` flags by using native Vim (only available with Vim 8 and
+newer).
 
 `looponfail`
 ------------
@@ -201,7 +200,7 @@ If the test fails, then this option will make Vim run the same test again as
 soon as the file is written.
 
 Once the test passes, it will no longer re-run the tests again. This option is
-available for `class`, `method`, `function` and `file`.
+available for ``class``, ``method``, ``function`` and ``file``.
 You would call it like::
 
     :Pytest method looponfail
@@ -213,15 +212,15 @@ the plugin you can do so by running the following command::
 
     :Pytest clear
 
-This is specifically useful when `looponfail` has been enabled and you want to
-stop its automatic behavior. Remember that `looponfail` will run every time you
+This is specifically useful when ``looponfail`` has been enabled and you want to
+stop its automatic behavior. Remember that ``looponfail`` will run every time you
 write the buffer and will keep doing so unless your test passes.
 
 Fast Next/Previous Error
 ------------------------
 Now when the Failed Error list is open and it as focus (cursor is currently in
 that window) you can move to the next or previous failed test line by using the
-arrow keys, `j`/`k`  or `Ctrl-n` / `Ctrl-p`
+arrow keys, ``j``/``k``  or ``Ctrl-n`` / ``Ctrl-p``
 
 Whenever you hit the bottom or the top of the list, you can loop around it!
 
@@ -243,39 +242,21 @@ from ``neovim``.
 before calling another test, otherwise, the plugin will kill the first in order
 to call the last one.
 
-
-``delgado`` support
--------------------
-`delgado <https://github.com/alfredodeza/delgado#pytest>`_ is a very small
-Python package that can execute commands in the terminal that are sent over
-a UDP socket. In some ocassions you might need to pass various different
-options to ``py.test`` that ``pytest.vim`` does not support (like distributed,
-coverage or highly verbose flags).
-
-``pytest.vim`` allows you to not run the actual command in Vim, but compound
-everything you need to run the test and send that information to ``delgado``,
-that should be up and running and listening for commands to run. In a separate
-terminal, ``delgado`` should be running like::
-
-    $ delgado pytest
-
-All the test objects (file, class, method, function) work for this, you just
-need to pass in ``delgado`` as an argument.
-
-An example call to a test method would look like this::
-
-    :Pytest method delgado
-
-Any extra options that ``py.test`` may accept can be appended to the command.
-This is how a very verbose distributed call would look like::
-
-    :Pytest method delgado -vv -n 4
-
-The results should be show in the terminal where ``delgado`` is running, not in
-Vim.
-
 Configuration
 -------------
+
+Custom executable
+^^^^^^^^^^^^^^^^^
+By default, the plugin uses ``py.test`` as the executable to run tests. Some
+Linux distros mangle the name to provide both Python 3 and Python 2 variants
+which forces one to pick a different name for the executable.
+
+This can be customized with either the filename of the executable or the path
+to the executable needed. For example, for a ``py.test-3`` name, it could be
+set in this way::
+
+    let g:pytest_executable = "py.test-3"
+
 Test directory
 ^^^^^^^^^^^^^^
 By default the project test directory is ``tests`` (i.e. test files are assumed
