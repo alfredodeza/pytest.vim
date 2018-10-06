@@ -23,6 +23,22 @@ Fail tests and Errors
 
 .. image:: https://github.com/alfredodeza/pytest.vim/raw/master/extras/fails.png
 
+Installation
+============
+This plugin is a *file type plugin*, which means that it is only enabled when
+the matching file type (Python in this case) is being edited. To ensure the
+plugin works correctly, the following setting must be enabled (usually in
+``.vimrc``)::
+
+    filetype on
+
+Without any install frameworks, all is needed is to drop the ``pytest.vim``
+file in one of the Vim runtime paths, in the subdirectory ``ftplugin/python/``
+
+If using ``vim-pathogen`` the whole repository can be placed in
+``.vim/bundle``. Otherwise please follow the guidelines of the package manager
+of choice.
+
 
 Usage
 =====
