@@ -1230,8 +1230,8 @@ function! s:ThisProject(verbose, ...)
         return
     endif
 
-    if len(a:2)
-        let extra_flags = join(a:2, ' ')
+    if len(a:3)
+        let extra_flags = join(a:3, ' ')
     endif
 
     if ((a:1 == '--pdb') || (a:1 == '-s'))
