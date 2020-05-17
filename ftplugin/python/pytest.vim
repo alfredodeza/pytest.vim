@@ -16,8 +16,12 @@ let g:pytest_session_errors    = {}
 let g:pytest_session_error     = 0
 let g:pytest_last_session      = ""
 let g:pytest_looponfail        = 0
-let g:pytest_test_dir          = 'tests'
-let g:pytest_test_file         = 'tests.py'
+if !exists("g:pytest_test_dir")
+	let g:pytest_test_dir        = 'tests'
+endif
+if !exists("g:pytest_test_file")
+	let g:pytest_test_file       = 'tests.py'
+endif
 
 " Process ID of async calls in NeoVim
 let s:id                       = 0
