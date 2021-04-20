@@ -618,7 +618,6 @@ function! s:RunPyTest(path, ...) abort
       if type(job_id) != type(0)
         call job_stop(job_id)
       endif
-
       let b:job_id = job_start(cmd, {'close_cb': 'CloseHandler'})
 
       return
@@ -631,10 +630,15 @@ endfunction
 
 func! CloseHandler(channel)
   let stdout = ""
+  let stderr = ""
   while ch_status(a:channel, {'part': 'out'}) == 'buffered'
-    let stdout = stdout . ch_read(a:channel) . "\n"
+    let stdout = stdout . ch_read(a:channel, {'part': 'out'}) . "\n"
   endwhile
-  call s:HandleOutput(stdout)
+  while ch_status(a:channel, {'part': 'err'}) == 'buffered'
+    let stderr = stderr . ch_read(a:channel, {'part': 'err'}) . "\n"
+  endwhile
+
+  call s:HandleOutput(stdout . stderr)
 endfunc
 
 
@@ -668,6 +672,10 @@ function! s:HandleOutput(stdout)
             return
         elseif w =~ '\v\s+(ERRORS)\s+'
             call s:ParseErrors(out)
+            return
+        " conftest and plugin errors break all parsing
+        elseif w =~ '\v^E\s+\w+:\s+'
+            call s:ParseError(out)
             return
         elseif w =~ '\v^(.*)\s*ERROR:\s+'
             call s:ParseError(out)
