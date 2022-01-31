@@ -872,7 +872,7 @@ function! s:ParseErrors(stdout)
 
         elseif w =~ '\v\s+(ERRORS)\s+'
             let failed = 1
-        elseif w =~ '\v^E\s+(File)'
+        elseif w =~ '\v^E\s+(File)\s+'
             let match_line_no = matchlist(w, '\v\s+(line)\s+(\d+)')
             let error['line'] = match_line_no[2]
             let error['file_line'] = match_line_no[2]
