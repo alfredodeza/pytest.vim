@@ -137,7 +137,7 @@ file. The list of jumping-to-error arguments are::
     end
 
 
-Pytest **DOES NOT JUMP AUTOMATICALLY** to errors. You have to call the action. When
+Pytest.vim **DOES NOT JUMP AUTOMATICALLY** to errors. You have to call the action. When
 you call a jump, a split buffer is opened with a file (if it is not the same as
 the one you are currently editing) and places you in the same line number were
 the error was reported.
