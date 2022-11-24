@@ -280,7 +280,7 @@ function! s:FindPythonObject(obj)
         let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\_s*(self[^)]*)'
         let max_indent_allowed = 4
     else
-        let objregexp = '\v^\s*(.*def)\s+(\w+)\s*\(\_s*(.*self)@!'
+        let objregexp = '\v^\s*(.*def)\s+(test\w+)\s*\(\_s*(.*self)@!'
         let max_indent_allowed = orig_indent
     endif
 
@@ -331,7 +331,8 @@ function! s:NameOfCurrentFunction()
     let find_object = s:FindPythonObject('function')
     if (find_object)
         let line = getline('.')
-        let match_result = matchlist(line, ' *def \+\(\w\+\)')
+        let match_result = matchlist(line, ' *def \+\(test\w\+\)')
+        echom("match_result: " . string(match_result))
         return match_result[1]
     endif
 endfunction
@@ -561,7 +562,7 @@ function! s:ResetAll()
     let g:pytest_session_error     = 0
     let g:pytest_last_session      = ""
     let g:pytest_looponfail        = 0
-endfunction!
+endfunction
 
 
 function! s:RunPyTest(path, ...) abort
