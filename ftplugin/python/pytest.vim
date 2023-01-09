@@ -567,7 +567,7 @@ endfunction
 
 function! s:RunPyTest(path, ...) abort
     let parametrized = 0
-    let extra_flags = ''
+    let extra_flags = '--testmon'
     let job_id = get(b:, 'job_id')
 
     if !exists("g:pytest_use_async")
