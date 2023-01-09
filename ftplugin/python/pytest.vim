@@ -365,7 +365,7 @@ endfunction
 
 
 function! s:RunInSplitWindow(path)
-    let cmd = g:pytest_executable . " --tb=short " . a:path
+    let cmd = g:pytest_executable . " --tb=short --testmon " . a:path
     let command = join(map(split(cmd), 'expand(v:val)'))
     let winnr = bufwinnr('PytestVerbose.pytest')
     silent! execute  winnr < 0 ? 'botright new ' . 'PytestVerbose.pytest' : winnr . 'wincmd w'
