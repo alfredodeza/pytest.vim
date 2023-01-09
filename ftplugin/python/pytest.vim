@@ -75,6 +75,12 @@ function! s:SetExecutable()
     endif
 endfunction
 
+function! s:SetExtraFlags()
+	if !exists("g:pytest_extraflags")
+		let g:pytest_extraflags = ""
+	endif
+endfunction
+
 function! s:LoopOnFail(type)
 
     augroup pytest_loop_autocmd
@@ -567,7 +573,7 @@ endfunction
 
 function! s:RunPyTest(path, ...) abort
     let parametrized = 0
-    let extra_flags = '--testmon'
+    let extra_flags = ''
     let job_id = get(b:, 'job_id')
 
     if !exists("g:pytest_use_async")
@@ -586,9 +592,9 @@ function! s:RunPyTest(path, ...) abort
     let g:pytest_last_session = ""
 
     if (len(parametrized) && parametrized != "0")
-        let cmd = g:pytest_executable . " -k " . parametrized . " " . extra_flags . " --tb=short " . a:path
+        let cmd = g:pytest_executable . " -k " . parametrized . " " . extra_flags . " " . g:pytest_extraflags . " --tb=short " . a:path
     else
-        let cmd = g:pytest_executable . " " . extra_flags . " --tb=short " . a:path
+        let cmd = g:pytest_executable . " " . extra_flags . " " . g:pytest_extraflags . " --tb=short " . a:path
     endif
 
     " NeoVim support
