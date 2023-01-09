@@ -293,6 +293,16 @@ By default the test file is ``tests.py``.The global variable
 configures the test file to be ``/path/to/project/tests/test_myproj.py``
 (assuming the default value for the project test directory)
 
+Pytest Flags
+^^^^^^^^^^^^
+By default the pytest executable is run without flags. To pass extra flags the global
+variable ``pytest_extraflags`` may be used, for example::
+
+    let g:pytest_extraflags = '--testmon'
+
+will run pytest with the ``--testmon`` flag.
+
+
 License
 -------
 
